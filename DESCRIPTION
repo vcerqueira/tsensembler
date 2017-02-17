@@ -1,0 +1,47 @@
+Package: tsensembler
+Title: Ensembles for Time Series Forecasting
+Version: 0.0.1
+Authors@R: c(person("Vitor", "Cerqueira", email = "cerqueira.vitormanuel@gmail.com", role = c("aut", "cre")),
+			 person("Luis", "Torgo", role = "ctb"),
+			 person("Mariana", "Oliveira", role = "ctb"))
+Description: This package provides methods and tools for ensemble learning
+    for time series forecasting tasks. It is versatile but easy to use framework
+    that calls learning methods from other R libraries, such as nnet, kernlab
+    or forecast. Available methods range from bagged trees to the classical
+    autoregressive methods.
+Depends:
+    R (>= 3.2.3),
+    performanceEstimation (>= 1.0.2)
+Imports:
+    xts (>= 0.9-7),
+    RcppRoll,
+    methods,
+    forecast,
+    ranger,
+    rpart,
+    glmnet,
+    earth,
+    kernlab,
+    Cubist,
+    nnet,
+    gbm,
+    deepnet,
+    zoo,
+    caret,
+    moments,
+    nonlinearTseries,
+    Rwave,
+    tseries,
+    rugarch,
+    igraph
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat
+License: GPL (>=2)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 5.0.1
+VignetteBuilder: knitr
+URL: http://github.com/vcerqueira/tsensembler
+BugReports: cerqueira.vitormanuel@gmail.com
