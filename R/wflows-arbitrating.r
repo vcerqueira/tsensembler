@@ -192,13 +192,12 @@ ADE_nopump <- function(form, train, test, learner, learner.pars, ...) {
                     nrow = warmup + 1L,
                     ncol = ncol(E_hat)), W)
 
-
   seq.test <- seq_len(nrow(test))
-  delegated.Y_hat <- lambda.delegation(Y_hat.prop, Y, test, lwindow=30, lambda=.33)
+  committee <- meanae.delegation(Y_hat.prop, Y, lambda = 5, committee.ratio = .5)
 
   y_hat <- vnapply(seq.test, function(j) {
-    f.Y_hat <- Y_hat.prop[j , delegated.Y_hat[[j]]]
-    f.W <- proportion(W[j , delegated.Y_hat[[j]]])
+    f.Y_hat <- Y_hat.prop[j , committee[[j]]]
+    f.W <- proportion(W[j , committee[[j]]])
     sum(f.Y_hat * f.W)
   })
 

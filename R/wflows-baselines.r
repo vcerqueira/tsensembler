@@ -36,7 +36,7 @@ Stacking <- function(form, train, test, learner, learner.pars, ...) {
                                  learner.pars = learner.pars,
                                  embedding.dimension = K)
 
-  oM <- ranger(target ~., OOB.train, num.trees = 750, write.forest = TRUE)
+  oM <- ranger(target ~., OOB.train, num.trees = 1000, write.forest = TRUE)
 
   y_hat <- predict(oM, Y_hat_set)$predictions
 
@@ -68,7 +68,7 @@ Blending <- function(form, train, test, learner, learner.pars, ...) {
                        learner.pars = learner.pars,
                        embedding.dimension = K)
 
-  oM <- ranger(target ~., OOB.train, num.trees = 750, write.forest = TRUE)
+  oM <- ranger(target ~., OOB.train, num.trees = 1000, write.forest = TRUE)
   y_hat <- predict(oM, Y_hat_set)$predictions
 
   list(preds = y_hat, trues = Y)

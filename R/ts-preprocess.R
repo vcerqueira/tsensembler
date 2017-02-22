@@ -128,25 +128,29 @@ ts.dynamics <- function(data) {
   trd <- apply(data, 1, trend)
   skw <- apply(data, 1, moments::skewness)
   kts <- apply(data, 1, moments::kurtosis)
-  mle <- apply(data, 1, function(r) {
-    Reduce(max,
-           nonlinearTseries::divergence(
-             nonlinearTseries::maxLyapunov(time.series = r,
-                                           min.embedding.dim = ceiling(K / 4),
-                                           max.embedding.dim = ceiling(K / 2),
-                                           radius = ceiling(K / 6),
-                                           do.plot = FALSE)
-           )
-    )
-  })
+  mn <- rowMeans(data)
+  dev <- apply(data, 1, sd)
+  #mle <- apply(data, 1, function(r) {
+  #  Reduce(max,
+  #         nonlinearTseries::divergence(
+  #           nonlinearTseries::maxLyapunov(time.series = r,
+  #                                         min.embedding.dim = ceiling(K / 4),
+  #                                         max.embedding.dim = ceiling(K / 2),
+  #                                         radius = ceiling(K / 6),
+  #                                         do.plot = FALSE)
+  #         )
+  #  )
+  #})
 
   hrst <- apply(data, 1, HURST)
-  selfs <- apply(data, 1, function(j) tseries::terasvirta.test(x = as.ts(unlistn(j)), lag = 3)$p.value)
+  #selfs <- apply(data, 1, function(j) tseries::terasvirta.test(x = as.ts(unlistn(j)), lag = 3)$p.value)
   serialcorr <- apply(data, 1, function(j) Box.test(j)$p.val)
 
-  dStats <- data.frame(trd, skw, kts, mle, hrst, selfs, serialcorr)
-  dStats[is.na(dStats)] <- double(1L)
-  colnames(dStats) <- c("trd", "skw", "kts", "mle", "hrst", "selfs", "serialcorr")
+  dStats <- data.frame(trd, skw, kts, hrst, serialcorr, mn, dev)
+  
+  colnames(dStats) <- c("trd", "skw", "kts", "hrst", "serialcorr", "mean.", "dev")
+  
+  dStats <- soft.completion(dStats)
 
   nzv_cols <- caret::nearZeroVar(dStats)
   if (length(nzv_cols) > 0L) {
@@ -175,3 +179,15 @@ rangedvar <- function(x, ...) var(x, ...) / (max(x, ...) - min(x, ...))
 #'
 #' @export
 trend <- function(x, ...) sd(x, ...) / sd(diff(x), ...)
+
+#' Soft Imputation
+#' 
+#' @param x data
+#' 
+#' @import softImpute
+#' 
+#' @export
+soft.completion <- function(x) {
+  if ("data.frame" %in% class(x)) x <- as.matrix(x)
+  as.data.frame(complete(x, softImpute(x)))
+}

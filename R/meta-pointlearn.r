@@ -39,7 +39,7 @@ point.metalearn.gausspr <- function(metadata, timeseq, steps = 10) {
     for (j in seq_along(timeseq)) {
       N_j <- timeseq[j]
       if (N_j %in% retrain.time) {
-        capture.output(metamodel <- gausspr(score ~., metaset[seq_len(N_j), ]))
+        capture.output(metamodel <- gausspr(score ~., metaset[seq_len(N_j), ], kernel = "vanilladot"))
       }
       om_yhat[j] <- predict(metamodel, metaset[N_j + 1L, ])
     }
@@ -64,7 +64,7 @@ point.metalearn.rf <- function(metadata, timeseq, steps = 10) {
     for (j in seq_along(timeseq)) {
       N_j <- timeseq[j]
       if (N_j %in% retrain.time) {
-        capture.output(metamodel <- ranger(score ~., metaset[seq_len(N_j), ], num.trees = 750, write.forest=TRUE))
+        capture.output(metamodel <- ranger(score ~., metaset[seq_len(N_j), ], num.trees = 1000, write.forest=TRUE))
       }
       om_yhat[j] <- predict(metamodel, metaset[N_j + 1L, ])$predictions
     }

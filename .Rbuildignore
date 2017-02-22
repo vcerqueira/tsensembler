@@ -1,0 +1,6 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^data-raw$
+^blackboard$
+^experimental-setups$
+^Data_KDD17$
