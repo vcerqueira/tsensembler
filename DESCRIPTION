@@ -33,7 +33,8 @@ Imports:
     Rwave,
     tseries,
     rugarch,
-    igraph
+    igraph,
+    softImpute
 Suggests:
     knitr,
     rmarkdown,

@@ -114,6 +114,57 @@ HURST <- function(x) {
   Rwave::hurst.est(wspwnoise, 1:7, 3, plot = FALSE)[[2]]
 }
 
+
+#' Time series dynamics
+#'
+#' @param data Numeric matrix to compute dynamics in, such as an
+#' embedded time series. 
+#'
+#' @export
+ts.dynamics.complete <- function(data) {
+  seq. <- seq_len(nrow(data))
+  seq_no1 <- seq.[-1]
+  K <- ncol(data)
+
+  trd <- apply(data, 1, trend)
+  skw <- apply(data, 1, moments::skewness)
+  kts <- apply(data, 1, moments::kurtosis)
+  mn <- rowMeans(data)
+  dev <- apply(data, 1, sd)
+  mle <- apply(data, 1, function(r) {
+    Reduce(max,
+           nonlinearTseries::divergence(
+             nonlinearTseries::maxLyapunov(time.series = r,
+                                           min.embedding.dim = ceiling(K / 4),
+                                           max.embedding.dim = ceiling(K / 2),
+                                           radius = ceiling(K / 6),
+                                           do.plot = FALSE)
+           )
+    )
+  })
+
+  hrst <- apply(data, 1, HURST)
+  selfs <- apply(data, 1, function(j) tseries::terasvirta.test(x = as.ts(unlistn(j)), lag = 3)$p.value)
+  serialcorr <- apply(data, 1, function(j) Box.test(j)$p.val)
+
+  dStats <- data.frame(trd, skw, kts, hrst, serialcorr, mle, selfs, mn, dev)
+  
+  colnames(dStats) <- c("trd", "skw", "kts", "hrst", "serialcorr", "mle", "selfs", "mean.", "dev")
+  
+  dStats <- soft.completion(dStats)
+
+  nzv_cols <- caret::nearZeroVar(dStats)
+  if (length(nzv_cols) > 0L) {
+    dStats <- subset(dStats, select = -nzv_cols)
+  }
+  rownames(dStats) <- NULL
+
+  preproc <- caret::preProcess(dStats)
+  dStats <- predict(preproc, dStats)
+
+  dStats
+}
+
 #' Time series dynamics
 #'
 #' @param data Numeric matrix to compute dynamics in, such as an
@@ -130,26 +181,11 @@ ts.dynamics <- function(data) {
   kts <- apply(data, 1, moments::kurtosis)
   mn <- rowMeans(data)
   dev <- apply(data, 1, sd)
-  #mle <- apply(data, 1, function(r) {
-  #  Reduce(max,
-  #         nonlinearTseries::divergence(
-  #           nonlinearTseries::maxLyapunov(time.series = r,
-  #                                         min.embedding.dim = ceiling(K / 4),
-  #                                         max.embedding.dim = ceiling(K / 2),
-  #                                         radius = ceiling(K / 6),
-  #                                         do.plot = FALSE)
-  #         )
-  #  )
-  #})
-
   hrst <- apply(data, 1, HURST)
-  #selfs <- apply(data, 1, function(j) tseries::terasvirta.test(x = as.ts(unlistn(j)), lag = 3)$p.value)
   serialcorr <- apply(data, 1, function(j) Box.test(j)$p.val)
 
   dStats <- data.frame(trd, skw, kts, hrst, serialcorr, mn, dev)
-  
   colnames(dStats) <- c("trd", "skw", "kts", "hrst", "serialcorr", "mean.", "dev")
-  
   dStats <- soft.completion(dStats)
 
   nzv_cols <- caret::nearZeroVar(dStats)
@@ -178,7 +214,13 @@ rangedvar <- function(x, ...) var(x, ...) / (max(x, ...) - min(x, ...))
 #' @param ... further params to \code{sd}
 #'
 #' @export
-trend <- function(x, ...) sd(x, ...) / sd(diff(x), ...)
+trend <- function(x, ...) {
+  r.trend <- sd(x, ...) / sd(diff(x)[-1], ...)
+
+  if (is.na(r.trend) || is.infinite(r.trend)) r.trend <- 0.
+
+  r.trend
+}
 
 #' Soft Imputation
 #' 
@@ -190,4 +232,13 @@ trend <- function(x, ...) sd(x, ...) / sd(diff(x), ...)
 soft.completion <- function(x) {
   if ("data.frame" %in% class(x)) x <- as.matrix(x)
   as.data.frame(complete(x, softImpute(x)))
+}
+
+series.imputation <- function(x, K) {
+  dtime <- index(x)
+  x_embed <- embed.timeseries(x, K)
+  x_embed <- soft.completion(x_embed)
+  x_ts <- unembed.timeseries(x_embed)$data
+  
+  as.xts(x_ts, order.by = dtime)  
 }

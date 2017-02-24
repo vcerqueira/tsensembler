@@ -272,6 +272,7 @@ GBM <- function(form, data, learner.pars) {
 #'
 #' @import glmnet
 GLM <- function(form, data, learner.pars) {
+  data <- soft.completion(data)
   baselearners <- list()
   bl <- 0L
   naming <- NULL

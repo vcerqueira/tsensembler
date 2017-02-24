@@ -274,6 +274,54 @@ boostedADE.simpledel <- function(form, train, test, learner, learner.pars, ...) 
                                  learner.pars = learner.pars,
                                  embedding.dimension = K)
 
+  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = ts.dynamics)
+
+  oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
+
+  n.oob <- nrow(oob.train)
+  n.test <- nrow(test)
+  seq.test <- seq_len(n.test)
+  timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
+
+  E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
+  W <- t(apply(E_hat, 1, modelWeighting, na.rm = TRUE))
+
+  committee <- meanae.delegation(Y_hat.prop, Y, lambda = 5, committee.ratio = .5)
+
+  y_hat <- vnapply(seq.test, function(j) {
+    f.Y_hat <- Y_hat.prop[j , committee[[j]]]
+    f.W <- proportion(W[j , committee[[j]]])
+    sum(f.Y_hat * f.W)
+  })
+
+  res <- list(trues = Y, preds = y_hat)
+
+  res
+}
+
+#' Forecasting Arbitrated Ensemble
+#' simple del
+#'
+#' @inheritParams boostedADE
+#'
+#' @export
+boostedADE.simpledel.nodyns <- function(form, train, test, learner, learner.pars, ...) {
+  K <- get_embedsize(train)
+  target <- get_target(form)
+
+  M <- learnM(form, train, learner, learner.pars, K)
+
+  Y <- get_y(test, form)
+
+  Y_hat <- predict(M, test)
+  Y_hat.prop <- prop_hat(Y_hat)
+
+  OOB.train <- ForwardValidation(x = train, nfolds = 10, OOB.fun, .rbind = FALSE,
+                                 form = form,
+                                 learner = learner,
+                                 learner.pars = learner.pars,
+                                 embedding.dimension = K)
+
   metadata <- setup.metadata(OOB.train, test, Y_hat)
 
   oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
@@ -284,6 +332,55 @@ boostedADE.simpledel <- function(form, train, test, learner, learner.pars, ...) 
   timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
 
   E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
+  W <- t(apply(E_hat, 1, modelWeighting, na.rm = TRUE))
+
+  committee <- meanae.delegation(Y_hat.prop, Y, lambda = 5, committee.ratio = .5)
+
+  y_hat <- vnapply(seq.test, function(j) {
+    f.Y_hat <- Y_hat.prop[j , committee[[j]]]
+    f.W <- proportion(W[j , committee[[j]]])
+    sum(f.Y_hat * f.W)
+  })
+
+  res <- list(trues = Y, preds = y_hat)
+
+  res
+}
+
+
+#' Forecasting Arbitrated Ensemble
+#' simple del
+#'
+#' @inheritParams boostedADE
+#'
+#' @export
+boostedADE.simpledel.gp <- function(form, train, test, learner, learner.pars, ...) {
+  K <- get_embedsize(train)
+  target <- get_target(form)
+
+  M <- learnM(form, train, learner, learner.pars, K)
+
+  Y <- get_y(test, form)
+
+  Y_hat <- predict(M, test)
+  Y_hat.prop <- prop_hat(Y_hat)
+
+  OOB.train <- ForwardValidation(x = train, nfolds = 10, OOB.fun, .rbind = FALSE,
+                                 form = form,
+                                 learner = learner,
+                                 learner.pars = learner.pars,
+                                 embedding.dimension = K)
+
+  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = ts.dynamics)
+
+  oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
+
+  n.oob <- nrow(oob.train)
+  n.test <- nrow(test)
+  seq.test <- seq_len(n.test)
+  timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
+
+  E_hat <- point.metalearn.gausspr(metadata, timeseq, steps = 10)
   W <- t(apply(E_hat, 1, modelWeighting, na.rm = TRUE))
 
   committee <- meanae.delegation(Y_hat.prop, Y, lambda = 5, committee.ratio = .5)
