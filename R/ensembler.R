@@ -332,10 +332,16 @@ meanae.delegation <- function(Y_hat, Y, lambda, committee.ratio = .5) {
   ae.M <- as.data.frame(lapply(Y_hat, function(j) ae(j, Y)))
   rownames(ae.M) <- NULL
   ae.M.smooth <- rollmeanmatrix(ae.M, lambda)
-
+  ae.M.smooth <- rbind.data.frame(rep(1., times = ncol(ae.M)), ae.M.smooth)
+  
   beta <- apply(ae.M.smooth, 1, quantile, probs = committee.ratio)
-
-  l1apply(ae.M.smooth, function(j) {
+  
+  C <- l1apply(ae.M.smooth, function(j) {
     which(ae.M.smooth[j, ] < beta[j])
   })
+  
+  nullC <- which(vnapply(C, length) < 1)
+  for (k in nullC) C[[k]] <- seq_len(ncol(ae.M))
+  
+  C
 }

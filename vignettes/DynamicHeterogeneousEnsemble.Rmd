@@ -1,15 +1,15 @@
 ---
-title: "Dynamic and Heterogeneous Ensembles\\ for Time Series Forecasting"
+title: "Dynamic and Heterogeneous Ensembles\ for Time Series Forecasting"
 author: "Vítor Cerqueira, Luís Torgo, Mariana Oliveira and Bernhard Pfahringer"
-date: "`r Sys.Date()`"
+date: '`r Sys.Date()`'
 output:
+  html_document:
+    toc: yes
   pdf_document:
-    toc: TRUE
     fig_caption: yes
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+    toc: yes
+vignette: |
+  %\VignetteIndexEntry{Vignette Title} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
 ---
 
 # Introduction
@@ -104,4 +104,11 @@ We have an ensemble ready for forecasting next values of water consumption level
 ```{r, eval=FALSE}
 forecast(dynamic_ensemble, Y, h = 10)
 ```
+
+To predict on some ready embedded data (i.e. a test set in a similar matricial form) we use the function `predict`, as standard in the R predictive models:
+
+```{r}
+predict(dynamic_ensemble, embedded_Y)
+```
+
 
