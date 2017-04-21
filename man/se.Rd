@@ -4,12 +4,15 @@
 \alias{se}
 \title{se}
 \usage{
-se(true, pred)
+se(y, y_hat)
 }
 \arguments{
-\item{true}{True values}
+\item{y}{A numeric vector representing the actual values.}
 
-\item{pred}{Predicted values}
+\item{y_hat}{A numeric vector representing the forecasted values.}
+}
+\value{
+squared error of forecasted values.
 }
 \description{
 Utility function to compute pointwise squared error (SE)

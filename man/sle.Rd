@@ -4,13 +4,13 @@
 \alias{sle}
 \title{sle}
 \usage{
-sle(true, pred)
+sle(y, y_hat)
 }
 \arguments{
-\item{true}{True values}
+\item{y}{A numeric vector representing the actual values.}
 
-\item{pred}{Predicted values}
+\item{y_hat}{A numeric vector representing the forecasted values.}
 }
 \description{
-Squared Logarithmic Error. Element-wise computation
+Element-wise computation of the squared logarithmic error
 }

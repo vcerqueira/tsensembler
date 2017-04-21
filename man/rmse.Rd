@@ -4,12 +4,12 @@
 \alias{rmse}
 \title{rmse}
 \usage{
-rmse(true, pred)
+rmse(y, y_hat)
 }
 \arguments{
-\item{true}{True values}
+\item{y}{A numeric vector representing the actual values.}
 
-\item{pred}{Predicted values}
+\item{y_hat}{A numeric vector representing the forecasted values.}
 }
 \description{
 Utility function to compute Root Mean Squared Error (RMSE)

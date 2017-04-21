@@ -4,13 +4,13 @@
 \alias{msle}
 \title{msle}
 \usage{
-msle(true, pred)
+msle(y, y_hat)
 }
 \arguments{
-\item{true}{True values}
+\item{y}{A numeric vector representing the actual values.}
 
-\item{pred}{Predicted values}
+\item{y_hat}{A numeric vector representing the forecasted values.}
 }
 \description{
-Mean Squared Logarithmic Error. Element-wise computation
+Mean squared logarithmic error.
 }

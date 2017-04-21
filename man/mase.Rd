@@ -4,13 +4,14 @@
 \alias{mase}
 \title{Mean absolute Scaled Error}
 \usage{
-mase(y_hat, y)
+mase(y, y_hat)
 }
 \arguments{
-\item{y_hat}{preds}
+\item{y}{A numeric vector representing the actual values.}
 
-\item{y}{trues}
+\item{y_hat}{A numeric vector representing the forecasted values.}
 }
 \description{
-Mean absolute Scaled Error
+Mean absolute scaled error using the previous value as
+baseline (i.e. a random walk)
 }

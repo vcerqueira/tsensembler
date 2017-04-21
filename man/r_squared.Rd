@@ -7,10 +7,10 @@
 r_squared(y, y_hat)
 }
 \arguments{
-\item{y}{true values}
+\item{y}{A numeric vector representing the actual values.}
 
-\item{y_hat}{predicted values}
+\item{y_hat}{A numeric vector representing the forecasted values.}
 }
 \description{
-R squared
+Also known as the coefficient of determination
 }

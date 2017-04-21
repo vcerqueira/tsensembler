@@ -27,9 +27,6 @@ Type **devtools::install_github("vcerqueira/tsensembler")** in your R console to
 * Platform: x86_64-pc-linux-gnu (64-bit)
 * Running under: Ubuntu 14.04.3 LTS
 
-## Checking
+## Contact
 
-* using options ‘--no-manual --as-cran’
-
-R CMD check results
-0 errors | 0 warnings | 0 notes
+Any bug report or suggesting please contact me at vmac@inesctec.pt

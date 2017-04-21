@@ -4,12 +4,12 @@
 \alias{smape}
 \title{Symmetric Mean Absolute Percentage Error}
 \usage{
-smape(y_hat, y)
+smape(y, y_hat)
 }
 \arguments{
-\item{y_hat}{preds}
+\item{y}{A numeric vector representing the actual values.}
 
-\item{y}{trues}
+\item{y_hat}{A numeric vector representing the forecasted values.}
 }
 \description{
 Symmetric Mean Absolute Percentage Error

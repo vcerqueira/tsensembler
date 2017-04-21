@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{rleid}
 \alias{rleid}
-\title{my rleid}
+\title{rleid}
 \usage{
 rleid(x)
 }
@@ -10,5 +10,5 @@ rleid(x)
 \item{x}{vector}
 }
 \description{
-my rleid
+rleid
 }

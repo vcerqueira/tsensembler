@@ -4,10 +4,10 @@
 \alias{proportion}
 \title{proportion}
 \usage{
-proportion(score, ...)
+proportion(x, ...)
 }
 \arguments{
-\item{score}{a numeric vector.}
+\item{x}{a numeric vector.}
 
 \item{...}{Further arguments to \code{var} and \code{sum} function (e.g. na.rm = TRUE)}
 }

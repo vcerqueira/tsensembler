@@ -30,10 +30,12 @@
 #' }
 #' @param learner.pars Named list describing the parameter of the \code{learner}. Below are
 #' described some examples.
+#' @param lambda lambda
+#' @param committee.ratio committee.ratio
 #' @param ... Further parameters to pass to the function
 #'
 #' @export
-boostedADE <- function(form, train, test, learner, learner.pars, ...) {
+ADE <- function(form, train, test, learner, learner.pars, lambda = 50, committee.ratio = .5, ...) {
   K <- get_embedsize(train)
   target <- get_target(form)
 
@@ -50,7 +52,7 @@ boostedADE <- function(form, train, test, learner, learner.pars, ...) {
                                  learner.pars = learner.pars,
                                  embedding.dimension = K)
 
-  metadata <- setup.metadata(OOB.train, test, Y_hat)
+  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = NULL)
 
   oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
 
@@ -60,8 +62,15 @@ boostedADE <- function(form, train, test, learner, learner.pars, ...) {
   timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
 
   E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
+  W <- t(apply(E_hat, 1, model_weighting, na.rm = TRUE))
 
-  y_hat <- lambda.prediction(test, E_hat, Y_hat.prop, Y, lwindow = 30, lambda = .333)
+  committee <- meanae.delegation(Y_hat.prop, Y, lambda = lambda, committee.ratio = committee.ratio)
+
+  y_hat <- vnapply(seq.test, function(j) {
+    f.Y_hat <- unlistn(Y_hat.prop[j , committee[[j]]])
+    f.W <- proportion(W[j , committee[[j]]])
+    sum(f.Y_hat * f.W)
+  })
 
   res <- list(trues = Y, preds = y_hat)
 
@@ -72,10 +81,10 @@ boostedADE <- function(form, train, test, learner, learner.pars, ...) {
 #'
 #' selects the most reliable learner
 #'
-#' @inheritParams boostedADE
+#' @inheritParams ADE
 #'
 #' @export
-ASE <- function(form, train, test, learner, learner.pars, ...) {
+ADE_Arb <- function(form, train, test, learner, learner.pars, ...) {
   K <- get_embedsize(train)
   target <- get_target(form)
   Y <- get_y(test, form)
@@ -93,7 +102,7 @@ ASE <- function(form, train, test, learner, learner.pars, ...) {
                                  learner.pars = learner.pars,
                                  embedding.dimension = K)
 
-  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = ts.dynamics)
+  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = NULL)
 
   oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
 
@@ -103,7 +112,7 @@ ASE <- function(form, train, test, learner, learner.pars, ...) {
   timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
 
   E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
-  W <- t(apply(E_hat, 1, modelWeighting, na.rm = TRUE))
+  W <- t(apply(E_hat, 1, model_weighting, na.rm = TRUE))
   W <- select_best(W)
 
 
@@ -117,10 +126,10 @@ ASE <- function(form, train, test, learner, learner.pars, ...) {
 #' Forecasting Arbitrated Ensemble
 #' no delegation
 #'
-#' @inheritParams boostedADE
+#' @inheritParams ADE
 #'
 #' @export
-AFE <- function(form, train, test, learner, learner.pars, ...) {
+ADE_all_models <- function(form, train, test, learner, learner.pars, ...) {
   K <- get_embedsize(train)
   target <- get_target(form)
   Y <- get_y(test, form)
@@ -138,7 +147,7 @@ AFE <- function(form, train, test, learner, learner.pars, ...) {
                                  learner.pars = learner.pars,
                                  embedding.dimension = K)
 
-  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = ts.dynamics)
+  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = NULL)
 
   oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
 
@@ -148,7 +157,7 @@ AFE <- function(form, train, test, learner, learner.pars, ...) {
   timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
 
   E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
-  W <- t(apply(E_hat, 1, modelWeighting, na.rm = TRUE))
+  W <- t(apply(E_hat, 1, model_weighting, na.rm = TRUE))
 
   y_hat <- vnapply(seq.test, function(j) sum(Y_hat.prop[j, ] * W[j, ]))
 
@@ -160,10 +169,10 @@ AFE <- function(form, train, test, learner, learner.pars, ...) {
 #' Forecasting Arbitrated Ensemble
 #' no delegation
 #'
-#' @inheritParams boostedADE
+#' @inheritParams ADE
 #'
 #' @export
-ADE_meta <- function(form, train, test, learner, learner.pars, lambda = 50, committee.ratio = .5, ...) {
+ADE_4metaanalysis <- function(form, train, test, learner, learner.pars, lambda = 50, committee.ratio = .5, ...) {
   K <- get_embedsize(train)
   target <- get_target(form)
 
@@ -191,7 +200,7 @@ ADE_meta <- function(form, train, test, learner, learner.pars, lambda = 50, comm
   timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
 
   E_hat <- point.metalearn.rf.augmented(metadata, timeseq, steps = 10)
-  W <- t(apply(E_hat[[1]], 1, modelWeighting.softmax, na.rm = TRUE))
+  W <- t(apply(E_hat[[1]], 1, model_weighting, na.rm = TRUE))
 
   var_imp <- as.data.frame(lapply(E_hat[[2]], function(j) proportion(ranger::importance(j))))
   r_squared <- vnapply(E_hat[[2]], function(j) j$r.squared)
@@ -206,7 +215,7 @@ ADE_meta <- function(form, train, test, learner, learner.pars, lambda = 50, comm
     sum(f.Y_hat * f.W)
   })
 
-  res <- list(trues = Y, preds = y_hat, E_hat = E_hat, E = E, meta_data = meta_data)
+  res <- list(E_hat = E_hat, E = E, meta_data = meta_data)
 
   res
 }
@@ -215,10 +224,10 @@ ADE_meta <- function(form, train, test, learner, learner.pars, lambda = 50, comm
 #' Forecasting Arbitrated Ensemble
 #' no pump
 #'
-#' @inheritParams boostedADE
+#' @inheritParams ADE
 #'
 #' @export
-ADE_nopump <- function(form, train, test, learner, learner.pars, ...) {
+ADE_meta_runtime <- function(form, train, test, learner, learner.pars, ...) {
   K <- get_embedsize(train)
   target <- get_target(form)
 
@@ -242,7 +251,7 @@ ADE_nopump <- function(form, train, test, learner, learner.pars, ...) {
 
   E_hat <- point.metalearn.rf(metadata, seq._, steps = 10)
 
-  W <- (t(apply(E_hat, 1, modelWeighting, na.rm = TRUE)))
+  W <- (t(apply(E_hat, 1, model_weighting, na.rm = TRUE)))
   W <- rbind(matrix(1 / ncol(E_hat),
                     nrow = warmup + 1L,
                     ncol = ncol(E_hat)), W)
@@ -264,10 +273,10 @@ ADE_nopump <- function(form, train, test, learner, learner.pars, ...) {
 #' Forecasting Arbitrated Ensemble
 #' select no pump
 #'
-#' @inheritParams boostedADE
+#' @inheritParams ADE
 #'
 #' @export
-ASE_nopump <- function(form, train, test, learner, learner.pars, ...) {
+Arbitrating <- function(form, train, test, learner, learner.pars, ...) {
   K <- get_embedsize(train)
   target <- get_target(form)
 
@@ -291,7 +300,7 @@ ASE_nopump <- function(form, train, test, learner, learner.pars, ...) {
 
   E_hat <- point.metalearn.rf(metadata, seq._, steps = 10)
 
-  W <- (t(apply(E_hat, 1, modelWeighting, na.rm = TRUE)))
+  W <- (t(apply(E_hat, 1, model_weighting, na.rm = TRUE)))
   W <- rbind(matrix(1 / ncol(E_hat),
                     nrow = warmup + 1L,
                     ncol = ncol(E_hat)), W)
@@ -307,60 +316,12 @@ ASE_nopump <- function(form, train, test, learner, learner.pars, ...) {
 }
 
 #' Forecasting Arbitrated Ensemble
-#' simple del pos prune
+#' simple del pos prune - 
 #'
-#' @inheritParams boostedADE
-#'
-#' @export
-boostedADE.simpledel <- function(form, train, test, learner, learner.pars, lambda_ = 50, committee.ratio_ = .5, ...) {
-  K <- get_embedsize(train)
-  target <- get_target(form)
-
-  M <- learnM(form, train, learner, learner.pars, K)
-
-  Y <- get_y(test, form)
-
-  Y_hat <- predict(M, test)
-  Y_hat.prop <- prop_hat(Y_hat)
-
-  OOB.train <- ForwardValidation(x = train, nfolds = 10, OOB.fun, .rbind = FALSE,
-                                 form = form,
-                                 learner = learner,
-                                 learner.pars = learner.pars,
-                                 embedding.dimension = K)
-
-  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = ts.dynamics)
-
-  oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
-
-  n.oob <- nrow(oob.train)
-  n.test <- nrow(test)
-  seq.test <- seq_len(n.test)
-  timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
-
-  E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
-  W <- t(apply(E_hat, 1, modelWeighting, na.rm = TRUE))
-
-  committee <- meanae.delegation(Y_hat.prop, Y, lambda = lambda_, committee.ratio = committee.ratio_)
-
-  y_hat <- vnapply(seq.test, function(j) {
-    f.Y_hat <- unlistn(Y_hat.prop[j , committee[[j]]])
-    f.W <- proportion(W[j , committee[[j]]])
-    sum(f.Y_hat * f.W)
-  })
-
-  res <- list(trues = Y, preds = y_hat)
-
-  res
-}
-
-#' Forecasting Arbitrated Ensemble
-#' simple del pos prune
-#'
-#' @inheritParams boostedADE
+#' @inheritParams ADE
 #'
 #' @export
-boostedADE.posprune <- function(form, train, test, learner, learner.pars, ...) {
+ADE_posprune <- function(form, train, test, learner, learner.pars, ...) {
   K <- get_embedsize(train)
   target <- get_target(form)
   
@@ -387,7 +348,7 @@ boostedADE.posprune <- function(form, train, test, learner, learner.pars, ...) {
   timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
   
   E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
-  W <- t(apply(E_hat, 1, modelWeighting, na.rm = TRUE))
+  W <- t(apply(E_hat, 1, model_weighting, na.rm = TRUE))
   
   #committee <- meanae.delegation(Y_hat.prop, Y, lambda = 5, committee.ratio = .5)
   lambda <- apply(W, 1, quantile, probs = .5)
@@ -408,105 +369,14 @@ boostedADE.posprune <- function(form, train, test, learner, learner.pars, ...) {
   res
 }
 
-#' Forecasting Arbitrated Ensemble
-#' simple del
-#'
-#' @inheritParams boostedADE
-#'
-#' @export
-boostedADE.simpledel.nodyns <- function(form, train, test, learner, learner.pars, lambda_ = 50, committee.ratio_ = .5, ...) {
-  K <- get_embedsize(train)
-  target <- get_target(form)
-
-  M <- learnM(form, train, learner, learner.pars, K)
-
-  Y <- get_y(test, form)
-
-  Y_hat <- predict(M, test)
-  Y_hat.prop <- prop_hat(Y_hat)
-
-  OOB.train <- ForwardValidation(x = train, nfolds = 10, OOB.fun, .rbind = FALSE,
-                                 form = form,
-                                 learner = learner,
-                                 learner.pars = learner.pars,
-                                 embedding.dimension = K)
-
-  metadata <- setup.metadata(OOB.train, test, Y_hat)
-
-  oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
-
-  n.oob <- nrow(oob.train)
-  n.test <- nrow(test)
-  seq.test <- seq_len(n.test)
-  timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
-
-  E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
-  W <- t(apply(E_hat, 1, modelWeighting, na.rm = TRUE))
-
-  committee <- meanae.delegation(Y_hat.prop, Y, lambda = lambda_, committee.ratio = committee.ratio_)
-
-  y_hat <- vnapply(seq.test, function(j) {
-    f.Y_hat <- unlistn(Y_hat.prop[j , committee[[j]]])
-    f.W <- proportion(W[j , committee[[j]]])
-    sum(f.Y_hat * f.W)
-  })
-
-  res <- list(trues = Y, preds = y_hat)
-
-  res
-}
-
 
 #' Forecasting Arbitrated Ensemble
-#' simple del
+#' linera committee
 #'
-#' @inheritParams boostedADE
+#' @inheritParams ADE
 #'
 #' @export
-boostedADE.simpledel.gp <- function(form, train, test, learner, learner.pars, lambda_ = 50, committee.ratio_ = .5, ...) {
-  K <- get_embedsize(train)
-  target <- get_target(form)
-
-  M <- learnM(form, train, learner, learner.pars, K)
-
-  Y <- get_y(test, form)
-
-  Y_hat <- predict(M, test)
-  Y_hat.prop <- prop_hat(Y_hat)
-
-  OOB.train <- ForwardValidation(x = train, nfolds = 10, OOB.fun, .rbind = FALSE,
-                                 form = form,
-                                 learner = learner,
-                                 learner.pars = learner.pars,
-                                 embedding.dimension = K)
-
-  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = ts.dynamics)
-
-  oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
-
-  n.oob <- nrow(oob.train)
-  n.test <- nrow(test)
-  seq.test <- seq_len(n.test)
-  timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
-
-  E_hat <- point.metalearn.gausspr(metadata, timeseq, steps = 10)
-  W <- t(apply(E_hat, 1, modelWeighting, na.rm = TRUE))
-
-  committee <- meanae.delegation(Y_hat.prop, Y, lambda = lambda_, committee.ratio = committee.ratio_)
-
-  y_hat <- vnapply(seq.test, function(j) {
-    f.Y_hat <- unlistn(Y_hat.prop[j , committee[[j]]])
-    f.W <- proportion(W[j , committee[[j]]])
-    sum(f.Y_hat * f.W)
-  })
-
-  res <- list(trues = Y, preds = y_hat)
-
-  res
-}
-
-
-ADE.softmax <- function(form, train, test, learner, learner.pars, lambda_ = 50, committee.ratio_ = .5, ...) {
+ADE_linear_committee <- function(form, train, test, learner, learner.pars, lambda = 50, committee.ratio = .5, ...) {
   K <- get_embedsize(train)
   target <- get_target(form)
   
@@ -523,7 +393,7 @@ ADE.softmax <- function(form, train, test, learner, learner.pars, lambda_ = 50, 
                                  learner.pars = learner.pars,
                                  embedding.dimension = K)
   
-  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = ts.dynamics)
+  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = NULL)
   
   oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
   
@@ -533,51 +403,9 @@ ADE.softmax <- function(form, train, test, learner, learner.pars, lambda_ = 50, 
   timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
   
   E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
-  W <- t(apply(E_hat, 1, modelWeighting.softmax, na.rm = TRUE))
+  W <- t(apply(E_hat, 1, model_weighting, trans="linear",na.rm = TRUE))
   
-  committee <- meanae.delegation(Y_hat.prop, Y, lambda = lambda_, committee.ratio = committee.ratio_)
-  
-  y_hat <- vnapply(seq.test, function(j) {
-    f.Y_hat <- unlistn(Y_hat.prop[j , committee[[j]]])
-    f.W <- proportion(W[j , committee[[j]]])
-    sum(f.Y_hat * f.W)
-  })
-  
-  res <- list(trues = Y, preds = y_hat)
-  
-  res
-}
-
-ADE.linear <- function(form, train, test, learner, learner.pars, lambda_ = 50, committee.ratio_ = .5, ...) {
-  K <- get_embedsize(train)
-  target <- get_target(form)
-  
-  M <- learnM(form, train, learner, learner.pars, K)
-  
-  Y <- get_y(test, form)
-  
-  Y_hat <- predict(M, test)
-  Y_hat.prop <- prop_hat(Y_hat)
-  
-  OOB.train <- ForwardValidation(x = train, nfolds = 10, OOB.fun, .rbind = FALSE,
-                                 form = form,
-                                 learner = learner,
-                                 learner.pars = learner.pars,
-                                 embedding.dimension = K)
-  
-  metadata <- setup.metadata(OOB.train, test, Y_hat, dynamics.FUN = ts.dynamics)
-  
-  oob.train <- rbind_(lapply(OOB.train, function(i) i$oob.train))
-  
-  n.oob <- nrow(oob.train)
-  n.test <- nrow(test)
-  seq.test <- seq_len(n.test)
-  timeseq <- seq_len(n.oob + n.test)[-seq_len(n.oob)] - 1 # -1 for gold
-  
-  E_hat <- point.metalearn.rf(metadata, timeseq, steps = 10)
-  W <- t(apply(E_hat, 1, modelWeighting.linear, na.rm = TRUE))
-  
-  committee <- meanae.delegation(Y_hat.prop, Y, lambda = lambda_, committee.ratio = committee.ratio_)
+  committee <- meanae.delegation(Y_hat.prop, Y, lambda = lambda, committee.ratio = committee.ratio)
   
   y_hat <- vnapply(seq.test, function(j) {
     f.Y_hat <- unlistn(Y_hat.prop[j , committee[[j]]])

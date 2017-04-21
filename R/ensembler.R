@@ -68,7 +68,7 @@ LearnerAnalysis <- function(predictions,
 EMASE <- function(SE, ma.N, preweights, smartass = FALSE) {
   MASE <- rollmeanmatrix(SE, ma.N)
 
-  fScores <- data.frame(t(apply(MASE, 1, modelWeighting)))
+  fScores <- data.frame(t(apply(MASE, 1, model_weighting, trans="erfc")))
   if (!smartass) {
     fScores <- rbind.data.frame(preweights, fScores[-NROW(fScores), ])
   }

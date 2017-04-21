@@ -2,13 +2,13 @@
 % Please edit documentation in R/ensembler.R
 \name{select_best}
 \alias{select_best}
-\title{Select best model from weights}
+\title{Selecting best model according to weights}
 \usage{
 select_best(model_scores)
 }
 \arguments{
-\item{model_scores}{model weights}
+\item{model_scores}{Matrix containing the model weights across the data}
 }
 \description{
-Select best model from weights
+Selecting best model according to weights
 }
