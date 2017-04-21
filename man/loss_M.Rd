@@ -19,4 +19,3 @@ as \code{list}. Defaults to TRUE}
 \description{
 The individual models compute point-wise loss
 }
-

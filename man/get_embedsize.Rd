@@ -12,4 +12,3 @@ get_embedsize(x)
 \description{
 Get embedding dimension from an embedded time series
 }
-

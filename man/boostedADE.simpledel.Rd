@@ -3,9 +3,10 @@
 \name{boostedADE.simpledel}
 \alias{boostedADE.simpledel}
 \title{Forecasting Arbitrated Ensemble
-simple del}
+simple del pos prune}
 \usage{
-boostedADE.simpledel(form, train, test, learner, learner.pars, ...)
+boostedADE.simpledel(form, train, test, learner, learner.pars, lambda_ = 50,
+  committee.ratio_ = 0.5, ...)
 }
 \arguments{
 \item{form}{Formula}
@@ -40,6 +41,5 @@ described some examples.}
 }
 \description{
 Forecasting Arbitrated Ensemble
-simple del
+simple del pos prune
 }
-

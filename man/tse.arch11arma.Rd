@@ -23,4 +23,3 @@ a predictive model ensemble. Otherwise, it returns performance statistics based 
 The forecast is calculated in a point-wise fashion. That is, the process
 is estimated at each step.
 }
-

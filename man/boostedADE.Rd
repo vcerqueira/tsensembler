@@ -45,4 +45,3 @@ iv - point metalearn
 v - delegate
 vi - predict
 }
-

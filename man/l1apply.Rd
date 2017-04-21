@@ -16,4 +16,3 @@ l1apply(obj, FUN, ...)
 \description{
 lapply on the rows
 }
-

@@ -12,4 +12,3 @@ diff_log(x)
 \description{
 diff log transformation of time series
 }
-

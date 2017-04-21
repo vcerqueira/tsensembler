@@ -18,4 +18,3 @@ Cubist is the implementation of learning procedure
 of an boosted rule-based regression model based on the
 implementation of \code{Cubist} package.
 }
-

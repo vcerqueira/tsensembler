@@ -13,4 +13,3 @@ embedded time series.}
 \description{
 Time series dynamics
 }
-

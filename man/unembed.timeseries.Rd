@@ -18,4 +18,3 @@ a time series
 This function reverts the process of embed.timeseries function.
 It takes an embedded series and returns the series as a sequential vector.
 }
-

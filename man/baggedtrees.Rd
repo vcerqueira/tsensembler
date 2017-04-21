@@ -34,4 +34,3 @@ Oliveira and Torgo (2014) -- Ensembles for Time Series Forecasting.
 In ACML Proceedings of Asian Conference on Machine Learning. JMLR: Workshop
 and Conference Proceedings, 2014.
 }
-

@@ -23,4 +23,3 @@ in performance of two or more models accross several predictive tasks.
 Check \code{\link[performanceEstimation]{pairedComparisons}} for a comprehensive
 explanation of the core method.
 }
-

@@ -15,4 +15,3 @@ Unlist not using names
 \seealso{
 \code{unlist}
 }
-

@@ -21,4 +21,3 @@ vapply extension for numeric values
 \seealso{
 \code{\link{vapply}}
 }
-

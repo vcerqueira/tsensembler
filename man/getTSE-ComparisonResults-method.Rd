@@ -20,4 +20,3 @@ This utility function handles a \code{ComparisonResults} object to
 extract the best performing learning ensemble model in a given \code{.iter}
 Monte Carlo repetition.
 }
-

@@ -26,4 +26,3 @@ This mathematical formula can be used as a squashing function.
 }
 
 }
-

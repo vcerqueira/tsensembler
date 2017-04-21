@@ -12,4 +12,3 @@ incremental_var(x)
 \description{
 Incremental variance along a vector
 }
-

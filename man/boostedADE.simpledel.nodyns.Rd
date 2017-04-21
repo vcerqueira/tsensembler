@@ -5,7 +5,8 @@
 \title{Forecasting Arbitrated Ensemble
 simple del}
 \usage{
-boostedADE.simpledel.nodyns(form, train, test, learner, learner.pars, ...)
+boostedADE.simpledel.nodyns(form, train, test, learner, learner.pars,
+  lambda_ = 50, committee.ratio_ = 0.5, ...)
 }
 \arguments{
 \item{form}{Formula}
@@ -42,4 +43,3 @@ described some examples.}
 Forecasting Arbitrated Ensemble
 simple del
 }
-

@@ -19,4 +19,3 @@ between the two estimators
 This function computes the log percentual difference
 between two numeric vector estimators
 }
-

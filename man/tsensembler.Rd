@@ -55,4 +55,3 @@ heterogeneous ensemble for time series forecasting.
 \seealso{
 \code{\link{tsesearch}}
 }
-

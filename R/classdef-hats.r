@@ -1,6 +1,6 @@
-setClassUnion("OptionalNumeric", c("numeric","NULL"))
-setClassUnion("OptionalList", c("list","NULL"))
-setClassUnion("OptionalDF", c("data.frame","NULL"))
+setClassUnion("OptionalNumeric", c("numeric", "NULL"))
+setClassUnion("OptionalList", c("list", "NULL"))
+setClassUnion("OptionalDF", c("data.frame", "NULL"))
 
 #' Predictions produced by a \code{tseModel} object
 #'

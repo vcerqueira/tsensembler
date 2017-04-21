@@ -40,4 +40,3 @@ described some examples.}
 \description{
 blending
 }
-

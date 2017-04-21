@@ -57,7 +57,7 @@ baggedtrees <- function(form,
 #' of an SVM for regression based on the implementation of \code{kernlab} package.
 #'
 #' @param form formula
-#' @param data embedded time series
+#' @param data embedded time series for training
 #' @param learner.pars list of learner parameter.
 #'
 #' @import kernlab

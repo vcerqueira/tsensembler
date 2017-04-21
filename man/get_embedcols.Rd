@@ -12,4 +12,3 @@ get_embedcols(x)
 \description{
 get cols that are part of the embedding vector
 }
-

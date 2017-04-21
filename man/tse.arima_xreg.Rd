@@ -20,4 +20,3 @@ tse.arima_xreg(form, train, test, xreg.id, ...)
 \description{
 auto arima with external features
 }
-

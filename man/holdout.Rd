@@ -18,4 +18,3 @@ holdout(x, estimation.ratio, FUN, ...)
 \description{
 holdout Procedure for oob
 }
-

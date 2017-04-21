@@ -1,78 +1,86 @@
 #' se
 #'
 #' Utility function to compute pointwise squared error (SE)
-#' @param true True values
-#' @param pred Predicted values
+#'
+#' @param y A numeric vector representing the actual values.
+#' @param y_hat A numeric vector representing the forecasted values.
+#'
+#' @return squared error of forecasted values.
+#'
 #' @export
-se <- function(true, pred) {
-  stopifnot(length(true) == length(pred),
-            is.numeric(true),
-            is.numeric(pred))
+se <- function(y, y_hat) {
+  stopifnot(length(y) == length(y_hat),
+            is.numeric(y),
+            is.numeric(y_hat))
 
-  (true - pred) ^ 2
+  (y - y_hat) ^ 2
 }
 
 #' mse
 #'
 #' Utility function to compute mean squared error (MSE)
-#' @param true True values
-#' @param pred Predicted values
+#'
+#' @inheritParams se
+#'
 #' @export
-mse <- function(true, pred) mean(se(true, pred))
+mse <- function(y, y_hat) mean(se(y, y_hat))
 
 #' rmse
 #'
 #' Utility function to compute Root Mean Squared Error (RMSE)
-#' @param true True values
-#' @param pred Predicted values
+#'
+#' @inheritParams se
+#'
 #' @export
-rmse <- function(true, pred) sqrt(mse(true, pred))
+rmse <- function(y, y_hat) sqrt(mse(y, y_hat))
 
 #' ae
 #'
-#' Absolute Error loss function. Element-wise computation
-#' @param true True values
-#' @param pred Predicted values
+#' Element-wise computation of the absolute error loss function.
+#'
+#' @inheritParams se
+#'
 #' @export
-ae <- function(true, pred) {
-  stopifnot(length(true) == length(pred),
-            is.numeric(true),
-            is.numeric(pred))
+ae <- function(y, y_hat) {
+  stopifnot(length(y) == length(y_hat),
+            is.numeric(y),
+            is.numeric(y_hat))
 
-  abs(true - pred)
+  abs(y - y_hat)
 }
-
-
 
 #' mae
 #'
 #' Mean Absolute Error loss function.
-#' @param true True values
-#' @param pred Predicted values
+#'
+#' @inheritParams se
+#'
 #' @export
-mae <- function(true, pred) mean(ae(true, pred))
+mae <- function(y, y_hat) mean(ae(y, y_hat))
 
 #' sle
 #'
-#' Squared Logarithmic Error. Element-wise computation
-#' @param true True values
-#' @param pred Predicted values
+#' Element-wise computation of the squared logarithmic error
+#'
+#' @inheritParams se
+#'
 #' @export
-sle <- function(true, pred) {
-  stopifnot(length(true) == length(pred),
-            is.numeric(true),
-            is.numeric(pred))
+sle <- function(y, y_hat) {
+  stopifnot(length(y) == length(y_hat),
+            is.numeric(y),
+            is.numeric(y_hat))
 
-  (log(1 + true) - log(1 + pred)) ^ 2
+  (log(1 + y) - log(1 + y_hat)) ^ 2
 }
 
 #' msle
 #'
-#' Mean Squared Logarithmic Error. Element-wise computation
-#' @param true True values
-#' @param pred Predicted values
+#' Mean squared logarithmic error.
+#'
+#' @inheritParams se
+#'
 #' @export
-msle <- function(true, pred) mean(sle(true, pred))
+msle <- function(y, y_hat) mean(sle(y, y_hat))
 
 #' Log Percentual Difference
 #'
@@ -90,4 +98,39 @@ perf_diff <- function(x, y) {
   xy_diff <- ((y - x) / x)
 
   sign(xy_diff) * log(abs(xy_diff + 1))
+}
+
+#' R squared
+#'
+#' Also known as the coefficient of determination
+#'
+#' @inheritParams se
+#'
+#' @export
+r_squared <- function(y, y_hat) {
+  1 - (sum((y - y_hat )^2) / sum((y - mean(y))^2))
+}
+
+#' Symmetric Mean Absolute Percentage Error
+#'
+#' @inheritParams se
+#'
+#' @export
+smape <- function(y, y_hat) {
+  (100 / length(y)) * sum(abs(y_hat - y) / ((abs(y_hat) + abs(y)) / 2))
+}
+
+#' Mean absolute Scaled Error
+#'
+#' Mean absolute scaled error using the previous value as
+#' baseline (i.e. a random walk)
+#'
+#' @inheritParams se
+#'
+#' @export
+mase <- function(y, y_hat) {
+  len <- length(y)
+  baseline <- c(NA_real_, y[-length(y)])
+  den <- (len / (len-1)) * sum(ae(y, baseline), na.rm = TRUE)
+  sum(abs(y - y_hat)) / den
 }

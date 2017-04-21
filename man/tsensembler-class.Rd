@@ -49,7 +49,7 @@ for a comprehensive explanation.}
 
 \item{\code{verbose}}{Logical. If TRUE, information about the learning procedure status is printed into the console.}
 }}
+
 \seealso{
 \code{\link{tsesearch}}
 }
-

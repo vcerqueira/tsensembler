@@ -31,4 +31,3 @@ Predictions by a tseModel
 \seealso{
 \code{\link{tseModel-class}} for the \code{tseModel} class.
 }
-

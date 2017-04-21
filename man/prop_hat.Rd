@@ -12,4 +12,3 @@ prop_hat(object)
 \description{
 Proportionalize the predictions of base models
 }
-

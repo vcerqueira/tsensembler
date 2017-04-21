@@ -32,4 +32,3 @@ embedded.ts <- embedStats(embed.timeseries(ts, 20L))
 \code{\link{embed.timeseries}} for details on the embedding
 of a time series into an Euclidean space.
 }
-

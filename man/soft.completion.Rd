@@ -12,4 +12,3 @@ soft.completion(x)
 \description{
 Soft Imputation
 }
-

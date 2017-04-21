@@ -14,4 +14,3 @@ msle(true, pred)
 \description{
 Mean Squared Logarithmic Error. Element-wise computation
 }
-

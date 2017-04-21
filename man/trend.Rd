@@ -14,4 +14,3 @@ trend(x, ...)
 \description{
 trend
 }
-

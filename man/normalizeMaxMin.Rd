@@ -24,4 +24,3 @@ normalizeMaxMin(1:10)
 normalizeMaxMin(c(1,2,NA,4), na.rm = TRUE)
 
 }
-

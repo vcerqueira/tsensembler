@@ -15,4 +15,3 @@ the target variable as character
 \description{
 Get the target from a formula
 }
-

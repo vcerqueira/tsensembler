@@ -18,4 +18,3 @@ MARS is the implementation of learning procedure
 of an Multivariate Adaptive Regression Splines based on the
 implementation of \code{earth} package.
 }
-

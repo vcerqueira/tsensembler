@@ -61,4 +61,3 @@ the computation of predictions of the base learning models;
 test observations; \code{\link{combinePredictions}} on details on how the
 base learners' predictions are combined.
 }
-

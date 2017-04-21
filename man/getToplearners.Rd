@@ -18,4 +18,3 @@ Top learners in test time
 This function extracts the top learners at each test point
 from a score matrix, according to the committee ratio.
 }
-

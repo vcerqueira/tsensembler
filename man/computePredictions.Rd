@@ -20,4 +20,3 @@ list of predictions for each base learning model.
 This function computes the predictions of a list of base learners
 in a test set
 }
-

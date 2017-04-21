@@ -12,4 +12,3 @@ rbind_(x)
 \description{
 rbind with do.call syntax
 }
-

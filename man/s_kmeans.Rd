@@ -27,4 +27,3 @@ s_kmeans(form, train, test, learner, learner.pars, varying.embed = TRUE,
 \description{
 ss_kmeans
 }
-

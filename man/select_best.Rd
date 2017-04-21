@@ -12,4 +12,3 @@ select_best(model_scores)
 \description{
 Select best model from weights
 }
-

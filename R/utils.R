@@ -93,10 +93,9 @@ bootstrap <- function(n) {
 #'
 #' This is an utility function that can be used to split expressions.
 #' It is based on \code{strsplit} function.
-#' .splitBy is the general purpose \emph{splitter}
-#' .splitBy_ splits expressions by \"_\"
-#' .splitBy. splits expressions by a dot
-#' .splitByequalsign splits expressions by an equal sign
+#' split_by is the general purpose \emph{splitter}
+#' split_by_ splits expressions by \"_\"
+#' split_by. splits expressions by a dot
 #'
 #' @param expr character expression to split
 #' @param split expression to split \code{expr} by
@@ -105,13 +104,12 @@ bootstrap <- function(n) {
 #' @return a vector with a splitted expression
 #'
 #' @examples
-#' .splitBy_("time_series")
-#' .splitBy.("time.series")
-#' .splitBy("born2bewild", "2")
-#' .splitByequalsign("k=2")
+#' split_by_("time_series")
+#' split_by.("time.series")
+#' split_by("born2bewild", "2")
 #'
 #' @export
-.splitBy <- function(expr, split, unlist. = TRUE, ...) {
+split_by <- function(expr, split, unlist. = TRUE, ...) {
   expr <- strsplit(expr, split = split, fixed = TRUE, ...)
   if (unlist.) expr <- unlistn(expr)
 
@@ -120,42 +118,38 @@ bootstrap <- function(n) {
 
 #' @rdname .splitBy
 #' @export
-.splitBy_ <- function(expr, ...) .splitBy(expr, split = "_", ...)
+split_by_ <- function(expr, ...) .splitBy(expr, split = "_", ...)
 
 #' @rdname .splitBy
 #' @export
-.splitBy. <- function(expr, ...) .splitBy(expr, split = ".", ...)
+split_by. <- function(expr, ...) .splitBy(expr, split = ".", ...)
 
-#' @rdname .splitBy
-#' @export
-.splitByequalsign <- function(expr, ...) .splitBy(expr, split = "=", ...)
-
-#' normalizeMaxMin
+#' normalize
 #'
-#' Utility function used to normalize a numeric vector using Max-Min
-#' normalization algorithm.
-#' @param score a numeric vector.
+#' Utility function used to linearly normalize a numeric vector 
+#' 
+#' @param x a numeric vector.
 #' @param ... Further arguments to min and max function (e.g. na.rm = TRUE)
 #'
 #' @examples
-#' normalizeMaxMin(rnorm(4L))
-#' normalizeMaxMin(1:10)
-#' normalizeMaxMin(c(1,2,NA,4), na.rm = TRUE)
+#' normalize(rnorm(4L))
+#' normalize(1:10)
+#' normalize(c(1,2,NA,4), na.rm = TRUE)
 #'
-#' @return a normalized vector
+#' @return a linearly normalized vector
 #'
 #' @export
-normalizeMaxMin <- function(score, ...) {
-  if (length(score) == 0L) {
+normalize <- function(x, ...) {
+  if (length(x) == 0L) {
     stop("passed an argument of length 0 on normalizeMaxMin function.")
   }
-  if (length(score) == 1L) return(1.)
-  if (!methods::is(score, "vector")) score <- unlistn(score)
-  if (var(score, ...) == 0) return(score)
-  if (!is.numeric(score)) stop("score must be numeric.")
+  if (length(x) == 1L) return(1.)
+  if (!methods::is(x, "vector")) x <- unlistn(x)
+  if (var(x, ...) == 0) return(x)
+  if (!is.numeric(x)) stop("x must be numeric.")
 
 
-  (score - min(score, ...)) / (max(score, ...) - min(score, ...))
+  (x - min(x, ...)) / (max(x, ...) - min(x, ...))
 }
 
 #' proportion
@@ -164,7 +158,7 @@ normalizeMaxMin <- function(score, ...) {
 #' The proportion of a value is its ratio relative
 #' to the sum of the vector.
 #'
-#' @param score a numeric vector.
+#' @param x a numeric vector.
 #' @param ... Further arguments to \code{var} and \code{sum} function (e.g. na.rm = TRUE)
 #'
 #' @examples
@@ -174,39 +168,38 @@ normalizeMaxMin <- function(score, ...) {
 #' @return A vector of proportions
 #'
 #' @export
-proportion <- function(score, ...) {
-  if (!methods::is(score, "numeric")) score <- unlistn(score)
-  if (length(score) == 1L) return(1)
-  if (var(score, ...) == 0) return(rep(1/length(score), times = length(score)))
+proportion <- function(x, ...) {
+  if (!methods::is(x, "numeric")) x <- unlistn(x)
+  if (length(x) == 1L) return(1)
+  if (var(x, ...) == 0) return(rep(1/length(x), times = length(x)))
 
-  score / sum(score, ...)
+  x / sum(x, ...)
 }
 
 
-#' .splitVec
+#' split_vec
 #'
 #' Utility function that splits a vector into n parts
 #' In this package this function is used for smoothing large vectors for plotting
 #'
-#' @param vec vector to split
-#' @param n number of parts to split vec into
+#' @param x vector to split
+#' @param n number of parts to split x into
 #' @param avg Logical. If \code{TRUE} returns the results averaged by mean.
 #'
 #' @examples
-#' .splitVec(letters[1:6], 3, F)
+#' split_vec(letters[1:6], 3, F)
 #'
 #' @return List of splitted vectors
 #'
 #' @export
-.splitVec <- function(vec, n, avg = TRUE) {
+split_vec <- function(x, n, avg = TRUE) {
   stopifnot(is.numeric(n))
 
-  svec <- split(vec, ceiling(seq_along(vec) / n))
+  s_vec <- split(x, ceiling(seq_along(x) / n))
 
-  if (avg) {
-    svec <- sapply(svec, mean)
-  }
-  svec
+  if (avg) s_vec <- sapply(s_vec, mean)
+
+  s_vec
 }
 
 #' Exponential Weighted Average Loss
@@ -336,7 +329,7 @@ cmplt_rollmedian <- function(x, n) {
   c(aux, rollm)
 }
 
-#' my rleid
+#' rleid
 #' 
 #' @param x vector
 rleid <- function(x) {
@@ -401,3 +394,16 @@ incremental_var <- function(x) {
 #' 
 #' @export
 log_trans <- function(x) sign(x) * log(abs(x) + 1)
+
+#' Softmax function
+#' 
+#' @param x numeric vector
+#' 
+#' @return squashed values according to the softmax
+#' 
+#' @export
+softmax <- function(x) {
+  x <- x[!is.na(x)]
+
+  exp(x) / sum(exp(x))
+}

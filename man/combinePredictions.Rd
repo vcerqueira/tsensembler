@@ -32,4 +32,3 @@ to a given combination type.
 base models. \code{\link{tseModel-class}} for details how the class of the
 Time Series Ensemble model.
 }
-

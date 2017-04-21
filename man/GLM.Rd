@@ -18,4 +18,3 @@ learningGLM is the implementation of learning procedure
 of an generalized linear model (e.g. LASSO, Ridge, Elastic-net) based
 on the implementation of \code{glmnet} package.
 }
-

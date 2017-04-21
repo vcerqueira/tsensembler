@@ -12,4 +12,3 @@ log_trans(x)
 \description{
 Logarithmic transformation
 }
-

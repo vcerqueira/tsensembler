@@ -18,4 +18,3 @@ GBM is the implementation of learning procedure
 of an generalized boosted regression model based on the
 implementation of \code{gbm} package.
 }
-

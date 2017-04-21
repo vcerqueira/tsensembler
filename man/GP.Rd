@@ -18,4 +18,3 @@ learningGP is the implementation of learning procedure
 of a Gaussian Processes model based on the implementation
 of \code{kernlab} package.
 }
-

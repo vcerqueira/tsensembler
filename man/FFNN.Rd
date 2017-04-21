@@ -18,4 +18,3 @@ FFNN is the implementation of learning procedure
 of an Feed Forward Neural Network for regression, based on the
 implementation of \code{nnet} package.
 }
-

@@ -18,4 +18,3 @@ the \code{data.frame} format identic to a given embedded time series.
 Using this application turns a \code{raw_signal} into a format suitable for
 tseModel objects to operate.
 }
-

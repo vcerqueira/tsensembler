@@ -29,4 +29,3 @@ model to such base models. This is based on theorem 2.3 presented by
 CESA-BIANCHI and LUGOSI in their book Prediction, Learning, and Games
 \(2006\).
 }
-

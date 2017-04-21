@@ -14,4 +14,3 @@ Regret(SE, Mstar)
 \description{
 Weighting base Models by Regret
 }
-

@@ -41,4 +41,3 @@ wl <- WinLoss(pairedComps, "WilcoxonSignedRank.test")
 \seealso{
 \code{\link[performanceEstimation]{pairedComparisons}}
 }
-

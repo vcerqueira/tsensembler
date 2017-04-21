@@ -20,4 +20,3 @@ ForwardValidation(x, nfolds, FUN, .rbind = TRUE, ...)
 \description{
 Forward Validation Procedure
 }
-

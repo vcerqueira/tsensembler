@@ -14,4 +14,3 @@ rangedvar(x, ...)
 \description{
 Normalized variance by range
 }
-

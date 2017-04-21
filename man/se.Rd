@@ -14,4 +14,3 @@ se(true, pred)
 \description{
 Utility function to compute pointwise squared error (SE)
 }
-

@@ -27,4 +27,3 @@ s_w(form, train, test, learner, learner.pars, varying.embed = FALSE,
 \description{
 ss_W
 }
-

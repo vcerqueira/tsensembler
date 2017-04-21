@@ -22,4 +22,3 @@ learnM(form, data, learner, learner.pars, embedding.dimension)
 Wrapper for learning the base learning models M
 It encapsulates the functions \code{Learntse} and \code{tseModel}
 }
-

@@ -24,4 +24,3 @@ This is an utility function that takes the raw error of models and scales
 them into a 0-1 range with the \code{erfc} function. These tranformations
 culminate into the final weights of the models.
 }
-

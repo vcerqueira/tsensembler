@@ -80,7 +80,7 @@ WinLoss <- function(pairedComp,
                             DT[i, 3] < 0,
                             DT[i, 3] < 0 && DT[i, "pval"] < pvalue))
   }
-  if (pretty) WL <- .prettify(WL)
+  if (pretty) WL <-prettify(WL)
   WL
 }
 
@@ -115,19 +115,19 @@ Multi.WinLoss <- function(ResultsList, test = "t.test", pretty = TRUE, ...) {
                  WinLoss(result, test = test, pretty = FALSE, ...)
                  })
                )
-  if (pretty) WL <- .prettify(WL)
+  if (pretty) WL <- prettify(WL)
 
   WL
 }
 
-#' .prettify
+#' prettify
 #'
 #' Utility function that transforms the results from \code{WinLoss}
 #' into a more visual appealing frame, to facilitate analysis.
 #' @param WL Results from Significance experiments
 #'
 #' @return Pretty results from Significance experiments
-.prettify <- function(WL) {
+prettify <- function(WL) {
   strWL <- data.frame(rep(NA, NROW(WL)))
   colnames(strWL) <- rownames(WL)[which(is.na(WL$Win))]
 
@@ -143,7 +143,7 @@ Multi.WinLoss <- function(ResultsList, test = "t.test", pretty = TRUE, ...) {
   na.omit(strWL)
 }
 
-#' avgRanks
+#' Average Rank of Workflows
 #'
 #' This function takes as input a paired comparisons object
 #' of workflows across several experiments and computes the
@@ -156,15 +156,15 @@ Multi.WinLoss <- function(ResultsList, test = "t.test", pretty = TRUE, ...) {
 #' of workflows
 #'
 #' @export
-avgRanks <- function(obj, metric = "rmse") {
+avg_ranks <- function(obj, metric = "rmse") {
   ranks <- as.data.frame(lapply(obj,
                                 function(z) {
                                   z[[metric]][["avgRksWFs"]]
                                   }))
 
   data.frame(workflow = rownames(ranks),
-             meanRank = rowMeans(ranks),
-             sdRank = apply(ranks, 1, sd), row.names = NULL)
+             meanRank = round(rowMeans(ranks), 2),
+             sdRank = round(apply(ranks, 1, sd), 2), row.names = NULL)
 }
 
 

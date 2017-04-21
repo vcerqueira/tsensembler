@@ -16,4 +16,3 @@ get_y(test, form)
 Get true values from test set
 from formula and the test set
 }
-

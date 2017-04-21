@@ -35,4 +35,3 @@ embedded.ts <- embed.timeseries(ts, 20L)
 \seealso{
 \code{\link[stats]{embed}} for the details of the embedding procedure.
 }
-

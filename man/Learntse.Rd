@@ -45,4 +45,3 @@ the learning models in the data.
 with the results from \emph{Learntse}. \code{\link{predict}} for details on
 the predict method for \emph{tseModel} class objects.
 }
-

@@ -42,4 +42,3 @@ described some examples.}
 Forecasting Arbitrated Ensemble
 no delegation
 }
-

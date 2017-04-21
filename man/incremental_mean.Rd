@@ -12,4 +12,3 @@ incremental_mean(x)
 \description{
 Incremental mean along a vector
 }
-

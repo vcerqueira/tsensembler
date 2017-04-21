@@ -12,4 +12,3 @@ rm.null(l)
 \description{
 List without null elements
 }
-

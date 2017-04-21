@@ -26,7 +26,7 @@ Predictions produced by a \code{tseModel} object
 
 \item{\code{data}}{data used to produce predictions}
 }}
+
 \seealso{
 \code{\link{tseModel-class}} for the \code{tseModel} class.
 }
-

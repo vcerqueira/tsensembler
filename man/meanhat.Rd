@@ -18,4 +18,3 @@ meanhat(form, train, test, ...)
 \description{
 Dummy mean workflow
 }
-

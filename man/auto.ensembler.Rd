@@ -38,4 +38,3 @@ of the implementation of the estimation procedure;
 Monte Carlo simulation method. \code{\link{TSE}} for details on the workflow
 for the time series ensemble.
 }
-

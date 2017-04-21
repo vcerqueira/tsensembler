@@ -18,4 +18,3 @@ meanae.delegation(Y_hat, Y, lambda, committee.ratio = 0.5)
 \description{
 from Y_hat and Y calculate mean ae and committee
 }
-

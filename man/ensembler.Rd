@@ -15,4 +15,3 @@ ensembler(obj, form)
 ensembler is a method from class \code{tsensembler}. This method
 applies learns a dynamic ensemble from the dataset provided.
 }
-

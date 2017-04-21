@@ -85,4 +85,3 @@ workflow <- Workflow(wf = 'TSE',
 \code{\link{ensembler}} for details on the method that encapsulates this
 workflow.
 }
-

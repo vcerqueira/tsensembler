@@ -18,4 +18,3 @@ learningPPR is the implementation of learning procedure
 of a Projection Pursuit Regression model based on the
 implementation of \code{stats} package.
 }
-

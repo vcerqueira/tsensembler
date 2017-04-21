@@ -125,31 +125,6 @@ Regret <- function(SE, Mstar) {
   fScores
 }
 
-#' Model Weighting with Erfc
-#'
-#' This is an utility function that takes the raw error of models and scales
-#' them into a 0-1 range with the \code{erfc} function. These tranformations
-#' culminate into the final weights of the models.
-#' @param err Model performance metric (SE)
-#' @param erfc.curve Logical: transform erro with erfc curve. Defaults to TRUE.
-#' @param err.ratio Logical: Compute error proportion. Defaults to TRUE.
-#' @param ... Further arguments to \code{normalizeMaxMin} and
-#' \code{proportion} functions (e.g. na.rm = TRUE)
-#'
-#' @return Weights of models
-#' @export
-modelWeighting <- function(err, erfc.curve = TRUE, err.ratio = TRUE, ...) {
-  if (methods::is(err, "list")) err <- unlistn(err)
-
-  err <- normalizeMaxMin(err, ...)
-  if (erfc.curve) err <- erfc(err)
-  if (err.ratio)  err <- proportion(err, ...)
-
-  err[is.na(err)] <- 0.
-
-  err
-}
-
 #' Extract Top Learners from the Weights of Base Models
 #'
 #' This function extracts the top learners at each test point
@@ -268,15 +243,9 @@ Learntse <- function(train,
   list(learningModels = .Models, preweights = prew, Mstar = Mstar)
 }
 
-#.addEmbed <- function(wf, embedding.dimension) {
-#  wf@pars$embedding.dimension <- embedding.dimension
-#  wf
-#}
-
-
-#' Select best model from weights
+#' Selecting best model according to weights
 #'
-#' @param model_scores model weights
+#' @param model_scores Matrix containing the model weights across the data
 #'
 #' @export
 select_best <- function(model_scores) {
@@ -332,7 +301,8 @@ meanae.delegation <- function(Y_hat, Y, lambda, committee.ratio = .5) {
   ae.M <- as.data.frame(lapply(Y_hat, function(j) ae(j, Y)))
   rownames(ae.M) <- NULL
   ae.M.smooth <- rollmeanmatrix(ae.M, lambda)
-  ae.M.smooth <- rbind.data.frame(rep(1., times = ncol(ae.M)), ae.M.smooth)
+  ae.M.smooth <- rbind.data.frame(rep(1., times = ncol(ae.M)), 
+                                  ae.M.smooth[-NROW(ae.M.smooth), ])
   
   beta <- apply(ae.M.smooth, 1, quantile, probs = committee.ratio)
   
@@ -344,4 +314,51 @@ meanae.delegation <- function(Y_hat, Y, lambda, committee.ratio = .5) {
   for (k in nullC) C[[k]] <- seq_len(ncol(ae.M))
   
   C
+}
+
+#' Model Weighting with Erfc
+#'
+#' This is an utility function that takes the raw error of models and scales
+#' them into a 0-1 range. 
+#' 
+#' One can use a simple linear transformation (\code{linear}) or more
+#' non-linear ones such as the \code{erfc} function or the \code{softmax}. 
+#' These tranformations culminate into the final weights of the models.
+#' 
+#' @param x Loss metric value
+#' 
+#' @param trans Character value describing the transformation type. 
+#' The available options are \strong{softmax}, \strong{linear} and
+#' \strong{erfc}. The softmax and erfc provide a non-linear transformation
+#' where the weights decay exponentially as the relative loss of a given model 
+#' increases (with respect to all available models). The linear transformation
+#' is a simple normalization of values.
+#' 
+#' @param ... Further arguments to \code{normalizeMaxMin} and
+#' \code{proportion} functions (e.g. na.rm = TRUE)
+#'
+#' @return Weights of models
+#' 
+#' @export
+model_weighting <- function(x, trans = "softmax", ...) {
+  if (!trans %in% c("softmax", "linear", "erfc")) 
+    stop("Please choose a proper model weighting strategy\n", call. = FALSE)
+  
+  if (is.list(x)) 
+    x <- unlistn(x)
+  
+  if (trans == "softmax") {
+    w <- softmax(-x)
+  } else if (trans == "linear") {
+    nx <- normalizeMaxMin(-x, ...)
+    w <- proportion(nx)
+  } else {
+    nx <- normalizeMaxMin(x, ...)
+    e_nx <- erfc(nx)
+    w <- proportion(e_nx, ...)
+  }
+  
+  w[is.na(w)] <- 0.
+  
+  w
 }

@@ -27,4 +27,3 @@ s_champ(form, train, test, learner, learner.pars, varying.embed = TRUE,
 \description{
 ss_champ
 }
-

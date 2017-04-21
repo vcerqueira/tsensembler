@@ -14,4 +14,3 @@ rollmeanmatrix(mat, ma.N)
 \description{
 Auxiliary function used to compute column-wise moving averages on a matrix
 }
-

@@ -38,4 +38,3 @@ embedding colums. Defaults to the whole data set \code{nrow(data)}}
 This class sets up the base learning models and respective
 parameters setting to learn the ensemble.
 }
-

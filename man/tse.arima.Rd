@@ -30,4 +30,3 @@ performs an optimal parameter tuning.
 \seealso{
 \code{\link[forecast]{auto.arima}} for an automatic arima procedure.
 }
-

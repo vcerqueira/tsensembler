@@ -50,4 +50,3 @@ pointforecast <- forecast(tse.model, ts, h = 4)
 \seealso{
 \code{\link{predict}} for a closely related method.
 }
-

@@ -53,6 +53,7 @@ If \code{committee.ratio} equals, say, 0.2, at time \emph{t}, the ensemble will 
 
 \item{\code{wfName}}{workflow key id used to used the right method.}
 }}
+
 \examples{
 \dontrun{
 .tse <- tseModel(baseModels,
@@ -71,4 +72,3 @@ object, \code{\link{forecast}} to forecast new upcoming data points of a time se
 \code{\link{SVM}},\code{\link{FFNN}}, \code{\link{RandomForest}} for some examples of
 base learners implementations.
 }
-

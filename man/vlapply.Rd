@@ -21,4 +21,3 @@ vapply extension for logical values
 \seealso{
 \code{\link{vapply}}
 }
-

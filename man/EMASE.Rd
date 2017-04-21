@@ -27,4 +27,3 @@ This method provides a simple way to quantify the recent
 performance of each base learner and adapt the combined
 model accordingly.
 }
-

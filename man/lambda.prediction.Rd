@@ -24,4 +24,3 @@ the idea is to track the performance of the base models
 those who have an accuracy - which is defined as REF - below a
 lambda threshold are left out of the prediction.
 }
-

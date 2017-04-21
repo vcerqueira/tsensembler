@@ -20,4 +20,3 @@ lambda.delegation(Y_hat, Y, test, lwindow, lambda)
 \description{
 lambda delegation function
 }
-

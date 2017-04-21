@@ -17,4 +17,3 @@ RandomForest(form, data, learner.pars)
 learningRandomForest is the implementation of learning procedure
 of an Random Forest model based on the implementation of \code{ranger} package.
 }
-

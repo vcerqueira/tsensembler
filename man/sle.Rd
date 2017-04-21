@@ -14,4 +14,3 @@ sle(true, pred)
 \description{
 Squared Logarithmic Error. Element-wise computation
 }
-

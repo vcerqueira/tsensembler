@@ -65,4 +65,3 @@ object, \code{\link{forecast}} to forecast new upcoming data points of a time se
 \code{\link{SVM}},\code{\link{FFNN}}, \code{\link{RandomForest}} for some examples of
 base learners implementations.
 }
-

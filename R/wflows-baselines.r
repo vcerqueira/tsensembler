@@ -1,16 +1,3 @@
-#' Dummy mean workflow
-#' 
-#' @param form Formula -- e.g. \code{target ~.}
-#' @param train embedded time series for training
-#' @param test embedded time series for testing
-#' @param ... Further parameters to \code{meanhat} function
-meanhat <- function(form, train, test, ...) {
-  target <- get_target(form)
-  preds <- mean(train[ ,target])
-
-  list(preds = preds, trues = test[ ,target])
-}
-
 #' stacking
 #'
 #' @inheritParams boostedADE
@@ -41,6 +28,182 @@ Stacking <- function(form, train, test, learner, learner.pars, ...) {
   y_hat <- predict(oM, Y_hat_set)$predictions
 
   list(preds = y_hat, trues = Y)
+}
+
+#' Forecaster Combination
+#' Model according to the guidelines
+#' of Sanchez in adaptive combination of forecasts
+#'
+#' @param form Formula
+#' @param train embedded time series used for training the base learners
+#' @param test embedded time series used for testing
+#' @param learner Character vector describing the base algorithms to be trained.
+#' @param learner.pars Named list describing the parameter of the \code{learner}. Below are
+#' described some examples.
+#' @param ff forgetting factor
+#' @param ... Further parameters to pass to the function
+#'
+#' @export
+AEC <- function(form, train, test,
+                learner, learner.pars, ff = .95, ...) {
+  K <- get_embedsize(train)
+  target <- get_target(form)
+  Y <- unname(get_y(test, form))
+  seq. <- seq_along(Y)
+
+  M <- learnM(form, train, learner, learner.pars, K)
+  
+  Y_hat <- predict(M, test)
+  Y_hat.prop <- prop_hat(Y_hat)
+  e_y <- loss_M(Y_hat, lossFUN = ae)
+  
+  W <- as.data.frame(matrix(nrow = NROW(test),
+                            ncol = ncol(Y_hat.prop)
+                            )
+                     )
+  W[1:2, ] <- 1.
+  
+  Wy <- as.data.frame(lapply(seq_along(W), function(y_W) {
+    y_hat <- Y_hat.prop[,y_W]
+    E_y <- e_y[,y_W]
+
+    r <- vnapply(seq_along(y_hat)[-(1:2)], function(y_w) {
+      var_y <- var(y_hat[seq_len(y_w - 1)])
+      v <- (1 / sqrt(var_y))
+
+      v * exp(-((E_y[y_w - 1]^2) / (2*var_y))) * ff
+    })
+    c(1.,1., r)
+  }))
+  colnames(Wy) <- colnames(Y_hat.prop)
+  
+  bad_m <- which(sapply(Wy, function(j) any(is.na(j))))
+  
+  if (length(bad_m) > 0) {
+    Wy <- Wy[,-bad_m]
+    Y_hat.prop <- Y_hat.prop[,-bad_m]
+  }
+
+  y_hat <- vnapply(seq., function(j) {
+    sum(unlistn(Y_hat.prop[j, ]) * proportion(unlistn(Wy[j, ])))
+  })
+
+  res <- list(trues = Y, preds = y_hat)
+
+  res
+}
+
+#' Forecaster Combination sw50
+#'
+#' @param form Formula
+#' @param train embedded time series used for training the base learners
+#' @param test embedded time series used for testing
+#' @param learner Character vector describing the base algorithms to be trained.
+#' @param learner.pars Named list describing the parameter of the \code{learner}. Below are
+#' described some examples.
+#' @param ma_n moving avg
+#' @param ... Further parameters to pass to the function
+#'
+#' @export
+S_W50 <- function(form, train, test,
+                  learner, learner.pars, ma_n = 50,  ...) {
+  K <- get_embedsize(train)
+  target <- get_target(form)
+  Y <- unname(get_y(test, form))
+  seq. <- seq_along(Y)
+
+  M <- learnM(form, train, learner, learner.pars, K)
+
+  Y_hat <- predict(M, test)
+  Y_hat.prop <- prop_hat(Y_hat)
+
+  E_Y <- loss_M(Y_hat, lossFUN = se)
+
+  MASE <- rollmeanmatrix(E_Y, ma.N=ma_n)
+  preweights <- rep(1./ncol(Y_hat.prop), times = ncol(Y_hat.prop))
+
+  fScores <- data.frame(t(apply(MASE, 1, function(j) {
+    proportion(normalizeMaxMin(-j))
+  })))
+  W <- rbind.data.frame(preweights, fScores[-NROW(fScores), ])
+
+  y_hat <- vnapply(seq., function(j) {
+    sum(unlistn(Y_hat.prop[j, ]) * proportion(unlistn(W[j, ])))
+  })
+
+  res <- list(trues = Y, preds = y_hat)
+
+  res
+}
+
+#' Forecaster Combination
+#' Model according to the guidelines
+#' of Timmermann in Elusive Return Predictability
+#'
+#' @param form Formula
+#' @param train embedded time series used for training the base learners
+#' @param test embedded time series used for testing
+#' @param learner Character vector describing the base algorithms to be trained.
+#' @param learner.pars Named list describing the parameter of the \code{learner}. Below are
+#' described some examples.
+#' @param ma_n moving avg
+#' @param R2_min min r squared
+#' @param ... Further parameters to pass to the function
+#'
+#' @export
+ERP_Timmermann <- function(form, train, test,
+                           learner, learner.pars,
+                           ma_n = 50, R2_min = .1, ...) {
+  K <- get_embedsize(train)
+  target <- get_target(form)
+  Y <- unname(get_y(test, form))
+  seq. <- seq_along(Y)
+
+  M <- learnM(form, train, learner, learner.pars, K)
+
+  Y_hat <- predict(M, test)
+  Y_hat.prop <- prop_hat(Y_hat)
+
+  R2 <- rbind_(lapply(seq., function(j) {
+    if (j <= ma_n)
+      in_seq <- seq_len(j)
+    else
+      in_seq <- (j-ma_n-1):j
+
+    as.data.frame(
+      lapply(Y_hat.prop[in_seq, ],
+             function(y_hat)
+               r_squared(Y[in_seq], y_hat)
+      )
+    )
+  }))
+  R2[1, ] <- 1
+
+  condition1 <- apply(R2, 1, function(j) any(j > R2_min))
+
+  prevailing_mean <- vnapply(seq.[-1], function(j) {
+    if (j <= ma_n + 1)
+      in_seq <- seq_len(j) - 1 #golden rule
+    else
+      in_seq <- (j-ma_n-1):j - 1 #golden rule
+
+    mean(Y[in_seq])
+  })
+
+  prevailing_mean <- c(0, prevailing_mean) # no primeiro uso sempre combinacao
+
+  y_hat <- vnapply(seq., function(j) {
+    if (condition1[[j]])
+      y_hat <- mean(unlistn(Y_hat.prop[j, ]))
+    else
+      y_hat <- prevailing_mean[j]
+
+    y_hat
+  })
+
+  res <- list(trues = Y, preds = y_hat)
+
+  res
 }
 
 #' blending

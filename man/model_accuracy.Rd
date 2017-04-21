@@ -18,4 +18,3 @@ Logical \code{data.frame} with the accuracy of each model
 This function computes the accuracy of regression models
 according to the predictions of all models and the actual value.
 }
-

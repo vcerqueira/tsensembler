@@ -24,4 +24,3 @@ OOB.fun.hat(train, test, form, learner, learner.pars, embedding.dimension)
 oob function for predictions fun
 it return out of bag predictions
 }
-

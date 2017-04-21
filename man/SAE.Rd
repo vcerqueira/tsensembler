@@ -24,4 +24,3 @@ an expert in neural networks. Tunable parameters are
 Activation function, hidden units, hidden units dropout
 and visible units dropout.
 }
-

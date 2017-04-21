@@ -53,4 +53,3 @@ tse.model <- ensembler(TSEr)
 about the Monte Carlo simulation procedure. \code{\link{TSE}} for details on the workflow
 for the time series ensemble.
 }
-

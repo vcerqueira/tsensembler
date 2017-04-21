@@ -27,4 +27,3 @@ s_s80(form, train, test, learner, learner.pars, varying.embed = TRUE,
 \description{
 ss_80
 }
-

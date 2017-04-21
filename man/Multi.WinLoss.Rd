@@ -36,4 +36,3 @@ wl <- Multi.WinLoss(pairedComps, "WilcoxonSignedRank.test")
 \seealso{
 \code{\link{Multi.pairedComparisons}}
 }
-

@@ -60,4 +60,3 @@ The methods \code{\link{ensembler}} or \code{\link{Multi.ensembler}} are used to
 object of class \code{tsensembler}. The normal output of the previously mentioned methods are
 of class \code{\link{tseModel-class}}.
 }
-

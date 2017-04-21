@@ -9,7 +9,7 @@ SVM(form, data, learner.pars = NULL)
 \arguments{
 \item{form}{formula}
 
-\item{data}{embedded time series}
+\item{data}{embedded time series for training}
 
 \item{learner.pars}{list of learner parameter.}
 }
@@ -17,4 +17,3 @@ SVM(form, data, learner.pars = NULL)
 SVM is the implementation of learning procedure
 of an SVM for regression based on the implementation of \code{kernlab} package.
 }
-

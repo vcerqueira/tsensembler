@@ -24,4 +24,3 @@ proportion(rnorm(5L))
 proportion(1:10)
 
 }
-

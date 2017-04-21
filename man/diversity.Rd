@@ -19,4 +19,3 @@ disagreement measure and chi-square
 ref: Measuring Diversity in Regression Ensembles
 author of paper: haimonti duta
 }
-
