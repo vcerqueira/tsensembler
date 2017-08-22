@@ -1,15 +1,27 @@
-#' Erfc
+#' Complementary Gaussian Error Function
 #'
 #' Erfc stands for the Complementary Gaussian Error Function.
 #' This mathematical formula can be used as a squashing function.
+#' Consider \code{x} a numeric vector representing the squared error of
+#' base models in a given observation. By applying the erfc function on
+#' the error, the weight of a given model decays exponentially as its
+#' loss increases.
 #'
-#' @param x A numeric vector in the range 0-1
-#' @param alpha parameter used to sharp the Erfc curve. Defaults to 1.
+#' @param x A numeric vector. The default value for the parameter
+#' \code{lambda} presumes that \code{x} is in a 0--1 range. In the scope of
+#' this package, this is achieved using normalize function;
+#'
+#' @param alpha parameter used to control the flatness of the erfc curve.
+#' Defaults to 2.
 #'
 #' @return The complementary Gaussian error
 #'
-#' @examples
+#' @references Cerqueira, Vitor; Torgo, Luis; Oliveira, Mariana,
+#' and Bernhard Pfahringer. "Dynamic and Heterogeneous Ensembles
+#' for Time Series Forecasting." Data Science and Advanced
+#' Analytics (DSAA), 2017 IEEE International Conference on. IEEE, 2017.
 #'
+#' @examples
 #' \dontrun{
 #'   erfc(.1)
 #'   erfc(c(.1, .7))
@@ -22,72 +34,74 @@ erfc <- function(x, alpha = 2) {
 	2 * stats::pnorm(-sqrt(2) * x * alpha)
 }
 
-#' Auxiliary function used to compute column-wise moving averages on a matrix
+#' Get the response values from a data matrix
 #'
-#' @param mat matrix
-#' @param ma.N periods to average over when computing the moving average.
+#' Given a formula and a data set, \code{get_y} function retrieves
+#' the response values.
+#'
+#' @param data data set with the response values;
+#'
+#' @param form formula
 #'
 #' @export
-rollmeanmatrix <- function(mat, ma.N) {
-  if (class(mat) != "data.frame") stop("mat obj class in rollmeanmatrix must be a data.frame")
-  dim1 <- NROW(mat)
-  MASE <- as.data.frame(
-    lapply(mat, function(z) {
-      rollm <- RcppRoll::roll_mean(z, n = ma.N)
-      blanks <- dim1 - length(rollm)
-      aux <- numeric(blanks)
-      for (y in seq_along(aux)) {
-        aux[y] <- RcppRoll::roll_mean(z, n = y)[1]
-      }
-    c(aux, rollm)
-  }))
-  MASE
-}
+get_y <-
+  function(data, form)
+    stats::model.response(stats::model.frame(form, data, na.action = NULL))
+
+
+#' Computing the rolling mean of the columns of a matrix
+#'
+#' @param x a numeric data.frame;
+#' @param lambda periods to average over when computing the
+#' moving average.
+#'
+#' @export
+roll_mean_matrix <-
+  function(x, lambda) {
+    if (class(x) != "data.frame")
+      stop("x obj class in roll_mean_matrix must be a data.frame")
+    dim1 <- NROW(x)
+
+    MASE <-
+      lapply(x,
+             function(z) {
+               rollm <- RcppRoll::roll_mean(z, n = lambda)
+               blanks <- dim1 - length(rollm)
+               aux <- numeric(blanks)
+               for (y in seq_along(aux)) {
+                 aux[y] <- RcppRoll::roll_mean(z, n = y)[1]
+               }
+               c(aux, rollm)
+             })
+    as.data.frame(MASE)
+  }
 
 #' First-In First Out
 #'
-#' First-In First Out utility function inserts a new value \code{.in} into
-#' a given sequential vector \code{x}, dropping the last value of the sequence
+#' First-In First Out utility function inserts a
+#' new value \code{inval} into a given sequential vector
+#' \code{x}, dropping the last value of the sequence
 #'
-#' @param x Vector
-#' @param .in New input value for vector x of the same class as \code{class(vector)}
+#' @param x a vector;
+#'
+#' @param inval new input value for vector x of the same
+#' mode as \code{vector}
 #'
 #' @return A new vector \code{x}
+#'
+#' @keywords internal
 #'
 #' @examples
 #' FIFO(1:10, 11)
 #' FIFO(LETTERS[1:10], letters[1])
 #'
 #' @export
-FIFO <- function(x, .in) {
-  stopifnot(mode(x) == mode(.in))
+FIFO <-
+  function(x, inval) {
+    stopifnot(mode(x) == mode(inval))
 
-  c(.in, x[-length(x)])
-}
-
-#' Pull yourself up by your bootstraps
-#'
-#' bootstrap utility function for random sampling with replacement.
-#'
-#' @param n Vector to choose elements from and also the size of the sample
-#'
-#' @examples
-#' \dontrun{
-#' bootstrap("a")
-#' bootstrap(FALSE)
-#' }
-#' bootstrap(5)
-#' bootstrap(5)
-#' bootstrap(3)
-#'
-#' @return A vector of sampled id's
-#'
-#' @export
-bootstrap <- function(n) {
-  if (!is.numeric(n)) stop("n must be numeric.")
-
-  sample(n, n, replace = TRUE)
-}
+    c(inval, x[-length(x)])
+  }
 
 #' Splitting expressions by pattern
 #'
@@ -97,11 +111,17 @@ bootstrap <- function(n) {
 #' split_by_ splits expressions by \"_\"
 #' split_by. splits expressions by a dot
 #'
-#' @param expr character expression to split
-#' @param split expression to split \code{expr} by
-#' @param unlist. Logical. If TRUE, the splitted \code{expr} is unlisted.
-#' @param ... Further parameters to pass to \code{strsplit}
-#' @return a vector with a splitted expression
+#' @param expr character expression to split;
+#'
+#' @param split expression to split \code{expr} by;
+#'
+#' @param unlist. Logical. If TRUE, the splitted \code{expr} is unlisted;
+#'
+#' @param ... Further parameters to pass to \code{strsplit};
+#'
+#' @return a list or vector with a splitted expression
+#'
+#' @keywords internal
 #'
 #' @examples
 #' split_by_("time_series")
@@ -116,20 +136,24 @@ split_by <- function(expr, split, unlist. = TRUE, ...) {
   expr
 }
 
-#' @rdname .splitBy
+#' @rdname split_by
 #' @export
-split_by_ <- function(expr, ...) .splitBy(expr, split = "_", ...)
+split_by_ <- function(expr, ...) split_by(expr, split = "_", ...)
 
-#' @rdname .splitBy
+#' @rdname split_by
 #' @export
-split_by. <- function(expr, ...) .splitBy(expr, split = ".", ...)
+split_by. <- function(expr, ...) split_by(expr, split = ".", ...)
 
-#' normalize
+
+#' Scale a numeric vector using max-min
 #'
-#' Utility function used to linearly normalize a numeric vector 
-#' 
+#' Utility function used to linearly normalize a numeric vector
+#'
 #' @param x a numeric vector.
-#' @param ... Further arguments to min and max function (e.g. na.rm = TRUE)
+#' @param ... Further arguments to min and max function
+#' (e.g. na.rm = TRUE)
+#'
+#' @keywords internal
 #'
 #' @examples
 #' normalize(rnorm(4L))
@@ -139,94 +163,52 @@ split_by. <- function(expr, ...) .splitBy(expr, split = ".", ...)
 #' @return a linearly normalized vector
 #'
 #' @export
-normalize <- function(x, ...) {
-  if (length(x) == 0L) {
-    stop("passed an argument of length 0 on normalizeMaxMin function.")
+normalize <-
+  function(x, ...) {
+    if (length(x) == 0L)
+      stop("passed an argument of length 0.")
+    if (!methods::is(x, "vector"))
+      x <- unlistn(x)
+    if (!is.numeric(x))
+      stop("x must be numeric.")
+    if (length(x) == 1L)
+      return(1.)
+    if (stats::var(x, na.rm = T) == 0)
+      return(x)
+
+    (x - min(x, ...)) / (max(x, ...) - min(x, ...))
   }
-  if (length(x) == 1L) return(1.)
-  if (!methods::is(x, "vector")) x <- unlistn(x)
-  if (var(x, ...) == 0) return(x)
-  if (!is.numeric(x)) stop("x must be numeric.")
 
-
-  (x - min(x, ...)) / (max(x, ...) - min(x, ...))
-}
-
-#' proportion
+#' Computing the proportions of a numeric vector
 #'
-#' Utility function used to compute the proportion of the values of a vector
-#' The proportion of a value is its ratio relative
+#' Utility function used to compute the proportion of the
+#' values of a vector. The proportion of a value is its ratio relative
 #' to the sum of the vector.
 #'
-#' @param x a numeric vector.
-#' @param ... Further arguments to \code{var} and \code{sum} function (e.g. na.rm = TRUE)
+#' @param x a numeric vector;
+#' @param ... Further arguments to \code{var} and \code{sum}
+#' function (e.g. na.rm = TRUE)
 #'
 #' @examples
 #' proportion(rnorm(5L))
 #' proportion(1:10)
 #'
+#' @keywords internal
+#'
 #' @return A vector of proportions
 #'
 #' @export
-proportion <- function(x, ...) {
-  if (!methods::is(x, "numeric")) x <- unlistn(x)
-  if (length(x) == 1L) return(1)
-  if (var(x, ...) == 0) return(rep(1/length(x), times = length(x)))
+proportion <-
+  function(x, ...) {
+    if (!methods::is(x, "numeric"))
+      x <- unlistn(x)
+    if (length(x) == 1L)
+      return(1)
+    if (stats::var(x, na.rm = T) == 0)
+      return(rep(1 / length(x), times = length(x)))
 
-  x / sum(x, ...)
-}
-
-
-#' split_vec
-#'
-#' Utility function that splits a vector into n parts
-#' In this package this function is used for smoothing large vectors for plotting
-#'
-#' @param x vector to split
-#' @param n number of parts to split x into
-#' @param avg Logical. If \code{TRUE} returns the results averaged by mean.
-#'
-#' @examples
-#' split_vec(letters[1:6], 3, F)
-#'
-#' @return List of splitted vectors
-#'
-#' @export
-split_vec <- function(x, n, avg = TRUE) {
-  stopifnot(is.numeric(n))
-
-  s_vec <- split(x, ceiling(seq_along(x) / n))
-
-  if (avg) s_vec <- sapply(s_vec, mean)
-
-  s_vec
-}
-
-#' Exponential Weighted Average Loss
-#'
-#' This is an utility function that computes the exponential
-#' loss of the base learners, in order to measure the regret of the combined
-#' model to such base models. This is based on theorem 2.3 presented by
-#' CESA-BIANCHI and LUGOSI in their book Prediction, Learning, and Games
-#' \(2006\).
-#'
-#' @param loss loss base models in a given prediction time.
-#' @param N number of total experts
-#' @param t_i prediction time. This is used in order to maintain uniform
-#' loss bounds.
-#' @param .proportion if TRUE, scales the results.
-#' @param windsize Window size used to compute bounds
-#'
-#' @return Exponential loss of each base model in a given prediction time
-#' step.
-expLoss <- function(loss, N, t_i, .proportion = FALSE, windsize = NULL) {
-  .p <- ifelse(is.null(windsize), t_i, windsize)
-  zeta <- sqrt((8. * log(N)) / .p)
-
-  .exp <- exp(-zeta * loss)
-  if (.proportion) .exp <- proportion(.exp)
-  .exp
-}
+    x / sum(x, na.rm = T)
+  }
 
 #' vapply extension for logical values
 #'
@@ -236,6 +218,8 @@ expLoss <- function(loss, N, t_i, .proportion = FALSE, windsize = NULL) {
 #' @param use.names logical. Check argument USE.NAMES from \code{vapply} function.
 #'
 #' @seealso \code{\link{vapply}}
+#'
+#' @keywords internal
 #'
 #' @export
 vlapply = function(x, fun, ..., use.names = FALSE) {
@@ -251,6 +235,8 @@ vlapply = function(x, fun, ..., use.names = FALSE) {
 #'
 #' @seealso \code{\link{vapply}}
 #'
+#' @keywords internal
+#'
 #' @export
 viapply = function(x, fun, ..., use.names = FALSE) {
   vapply(X = x, FUN = fun, ..., FUN.VALUE = NA_integer_, USE.NAMES = use.names)
@@ -264,6 +250,8 @@ viapply = function(x, fun, ..., use.names = FALSE) {
 #' @param use.names logical. Check argument USE.NAMES from \code{vapply} function.
 #'
 #' @seealso \code{\link{vapply}}
+#'
+#' @keywords internal
 #'
 #' @export
 vnapply = function(x, fun, ..., use.names = FALSE) {
@@ -279,6 +267,8 @@ vnapply = function(x, fun, ..., use.names = FALSE) {
 #'
 #' @seealso \code{\link{vapply}}
 #'
+#' @keywords internal
+#'
 #' @export
 vcapply = function(x, fun, ..., use.names = FALSE) {
   vapply(X = x, FUN = fun, ..., FUN.VALUE = NA_character_, USE.NAMES = use.names)
@@ -290,6 +280,8 @@ vcapply = function(x, fun, ..., use.names = FALSE) {
 #'
 #' @seealso \code{unlist}
 #'
+#' @keywords internal
+#'
 #' @export
 unlistn <- function(x) unlist(x, use.names = FALSE)
 
@@ -297,51 +289,42 @@ unlistn <- function(x) unlist(x, use.names = FALSE)
 #'
 #' @param form formula
 #'
+#' @keywords internal
+#'
 #' @return the target variable as character
 #'
 #' @export
-get_target <- function(form) .splitBy(deparse(form), " ")[1]
-
+get_target <- function(form) split_by(deparse(form), " ")[1]
 
 #' rbind with do.call syntax
 #'
 #' @param x object to call \code{rbind} to.
 #'
+#' @keywords internal
+#'
 #' @export
-rbind_ <- function(x) do.call(rbind, x)
-
+rbind_l <- function(x) do.call(rbind, x)
 
 #' List without null elements
 #'
 #' @param l list with null elements
 #'
+#' @keywords internal
+#'
 #' @export
 rm.null <- function(l) l[!vlapply(l, is.null)]
 
-cmplt_rollmedian <- function(x, n) {
-  len <- length(x)
-  rollm <- RcppRoll::roll_median(x, n = n)
-  blanks <- len - length(rollm)
-  aux <- numeric(blanks)
-  for (y in seq_along(aux)) {
-    aux[y] <- RcppRoll::roll_median(x, n = y)[1]
-  }
-  c(aux, rollm)
-}
 
-#' rleid
-#' 
-#' @param x vector
-rleid <- function(x) {
-  x <- rle(x)$lengths
-  rep(seq_along(x), times=x)
-}
-
-#' lapply on the rows
+#' Applying lapply on the rows
 #'
-#' @param obj obj
-#' @param FUN func
+#' Wrapper function used to compute lapply on the rows
+#' of a data.frame
+#'
+#' @param obj a data.frame object to apply the function.
+#' @param FUN function to apply to each row of \code{obj}
 #' @param ... Further parameters to \code{lapply}
+#'
+#' @keywords internal
 #'
 #' @export
 l1apply <- function(obj, FUN, ...) {
@@ -349,61 +332,75 @@ l1apply <- function(obj, FUN, ...) {
   lapply(X = xseq, FUN = FUN, ...)
 }
 
-#' diff log transformation of time series
-#' 
-#' @param x a timeseries
-#' 
-#' @export
-diff_log <- function(x) {
-  x <- diff(x)[-1]
-  
-  x.log <- sign(x) * log(abs(x) + 1)
-  
-  x.log
-}
-
-#' Incremental mean along a vector
-#' 
+#' Computing the softmax
+#'
+#' This function computes the softmax function in
+#' a numeric vector
+#'
 #' @param x numeric vector
-#' 
-#' @export
-incremental_mean <- function(x) {
-  seq. <- seq_along(x)
-  vnapply(seq., function(j) {
-    sub_x <- x[seq_len(j)]
-    RcppRoll::roll_mean(sub_x, length(sub_x))
-  })
-}
-
-#' Incremental variance along a vector
-#' 
-#' @param x numeric vector
-#' 
-#' @export
-incremental_var <- function(x) {
-  seq. <- seq_along(x)
-  vnapply(seq., function(j) {
-    sub_x <- x[seq_len(j)]
-    RcppRoll::roll_var(sub_x, length(sub_x))
-  })
-}
-
-#' Logarithmic transformation
-#' 
-#' @param x numeric vector
-#' 
-#' @export
-log_trans <- function(x) sign(x) * log(abs(x) + 1)
-
-#' Softmax function
-#' 
-#' @param x numeric vector
-#' 
-#' @return squashed values according to the softmax
-#' 
+#'
+#' @keywords internal
+#'
 #' @export
 softmax <- function(x) {
   x <- x[!is.na(x)]
 
   exp(x) / sum(exp(x))
 }
+
+is_model_in_pars <-
+  function(model, learner, lpnames) {
+    par_list <- list(learner, lpnames)
+    has_pars <-
+      sapply(par_list,
+             function(o)
+               model %in% o)
+
+    all(has_pars)
+  }
+
+are_pars_valid <-
+  function(learner, lpars) {
+    available_pars <-
+      switch(learner,
+             "bm_svr" = {
+               c("kernel", "C", "epsilon")
+             },
+             "bm_glm" = {
+               c("alpha")
+             },
+             "bm_gbm" = {
+               c("interaction.depth", "shrinkage", "n.trees")
+             },
+             "bm_ffnn" = {
+               c("size", "decay", "maxit")
+             },
+             "bm_randomforest" = {
+               c("num.trees", "mtry")
+             },
+             "bm_cubist" = {
+               c("committees", "neighbors")
+             },
+             "bm_mars" = {
+               c("nk", "thresh", "degree")
+             },
+             "bm_gaussianprocess" = {
+               c("kernel", "tol")
+             },
+             "bm_pls_pcr" = {
+               c("method")
+             },
+             "bm_ppr" = {
+               c("nterms", "sm.method")
+             })
+
+    mpars <- names(lpars[[learner]])
+
+    if (!all(mpars %in% available_pars)) {
+      bad_pars <- mpars[!mpars %in% available_pars]
+      warning(paste("Bad or not supported specification of parameter",
+                    "for model", learner, ":",
+                    paste(bad_pars, collapse = ", ")))
+    }
+  }
+

@@ -2,17 +2,19 @@
 % Please edit documentation in R/utils.R
 \name{l1apply}
 \alias{l1apply}
-\title{lapply on the rows}
+\title{Applying lapply on the rows}
 \usage{
 l1apply(obj, FUN, ...)
 }
 \arguments{
-\item{obj}{obj}
+\item{obj}{a data.frame object to apply the function.}
 
-\item{FUN}{func}
+\item{FUN}{function to apply to each row of \code{obj}}
 
 \item{...}{Further parameters to \code{lapply}}
 }
 \description{
-lapply on the rows
+Wrapper function used to compute lapply on the rows
+of a data.frame
 }
+\keyword{internal}

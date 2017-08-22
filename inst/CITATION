@@ -1,0 +1,17 @@
+citHeader("To cite tsensembler in publications use:")
+
+citEntry(entry = "Article",
+  title        = "Arbitrated Ensemble for Solar Radiation Forecasting",
+  author       = personList(as.person("Vitor Cerqueira"),
+                   as.person("Luis Torgo"), as.person("Carlos Soares")),
+  journal      = "International Work-Conference on Artificial Neural Networks",
+  year         = "2017",
+  pages        = "720--732",
+  organization = {"Springer"},
+
+  textVersion  =
+  paste("Vitor Cerqueira, Luis Torgo, Carlos Soares (2017).",
+        "Arbitrated Ensemble for Solar Radiation Forecasting.",
+        "International Work-Conference on Artificial Neural Networks, 720--732",
+        "Springer, Cham")
+)

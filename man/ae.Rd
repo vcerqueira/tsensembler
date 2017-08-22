@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.r
 \name{ae}
 \alias{ae}
-\title{ae}
+\title{Computing the absolute error}
 \usage{
 ae(y, y_hat)
 }
@@ -14,3 +14,9 @@ ae(y, y_hat)
 \description{
 Element-wise computation of the absolute error loss function.
 }
+\seealso{
+Other error/performance functions: \code{\link{mae}},
+  \code{\link{mase}}, \code{\link{mse}},
+  \code{\link{r_squared}}, \code{\link{se}}
+}
+\keyword{internal}

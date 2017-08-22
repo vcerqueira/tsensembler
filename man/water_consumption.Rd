@@ -3,22 +3,22 @@
 \docType{data}
 \name{water_consumption}
 \alias{water_consumption}
-\title{Water Consumption in Porto city (Portugal) area.}
-\format{The time series has 1741 values from Jan, 2012 to Oct, 
-2016 with a granularity of day.
+\title{Water Consumption in Oporto city (Portugal) area.}
+\format{The time series has 1741 values from Jan, 2012 to Oct,
+2016 in a daily granularity.
 \describe{
   \item{consumption}{consumption of water, raw value from sensor}
 }}
 \source{
-\url{http://addp.pt/}
+\url{https://www.addp.pt/home.php}
 }
 \usage{
 water_consumption
 }
 \description{
-A time series of classes \code{xts} and \code{zoo} 
-containing the water consumption 
-levels a specific delivery point at Porto town from 
+A time series of classes \code{xts} and \code{zoo}
+containing the water consumption
+levels a specific delivery point at Oporto town, in
 Portugal.
 }
 \keyword{datasets}

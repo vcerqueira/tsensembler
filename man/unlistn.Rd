@@ -15,3 +15,4 @@ Unlist not using names
 \seealso{
 \code{unlist}
 }
+\keyword{internal}

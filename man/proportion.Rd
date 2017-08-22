@@ -2,21 +2,22 @@
 % Please edit documentation in R/utils.R
 \name{proportion}
 \alias{proportion}
-\title{proportion}
+\title{Computing the proportions of a numeric vector}
 \usage{
 proportion(x, ...)
 }
 \arguments{
-\item{x}{a numeric vector.}
+\item{x}{a numeric vector;}
 
-\item{...}{Further arguments to \code{var} and \code{sum} function (e.g. na.rm = TRUE)}
+\item{...}{Further arguments to \code{var} and \code{sum}
+function (e.g. na.rm = TRUE)}
 }
 \value{
 A vector of proportions
 }
 \description{
-Utility function used to compute the proportion of the values of a vector
-The proportion of a value is its ratio relative
+Utility function used to compute the proportion of the
+values of a vector. The proportion of a value is its ratio relative
 to the sum of the vector.
 }
 \examples{
@@ -24,3 +25,4 @@ proportion(rnorm(5L))
 proportion(1:10)
 
 }
+\keyword{internal}

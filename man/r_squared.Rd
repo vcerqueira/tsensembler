@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.r
 \name{r_squared}
 \alias{r_squared}
-\title{R squared}
+\title{Computing R squared}
 \usage{
 r_squared(y, y_hat)
 }
@@ -14,3 +14,9 @@ r_squared(y, y_hat)
 \description{
 Also known as the coefficient of determination
 }
+\seealso{
+Other error/performance functions: \code{\link{ae}},
+  \code{\link{mae}}, \code{\link{mase}}, \code{\link{mse}},
+  \code{\link{se}}
+}
+\keyword{internal}

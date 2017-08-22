@@ -2,14 +2,17 @@
 % Please edit documentation in R/utils.R
 \name{erfc}
 \alias{erfc}
-\title{Erfc}
+\title{Complementary Gaussian Error Function}
 \usage{
 erfc(x, alpha = 2)
 }
 \arguments{
-\item{x}{A numeric vector in the range 0-1}
+\item{x}{A numeric vector. The default value for the parameter
+\code{lambda} presumes that \code{x} is in a 0--1 range. In the scope of
+this package, this is achieved using normalize function;}
 
-\item{alpha}{parameter used to sharp the Erfc curve. Defaults to 1.}
+\item{alpha}{parameter used to control the flatness of the erfc curve.
+Defaults to 2.}
 }
 \value{
 The complementary Gaussian error
@@ -17,12 +20,21 @@ The complementary Gaussian error
 \description{
 Erfc stands for the Complementary Gaussian Error Function.
 This mathematical formula can be used as a squashing function.
+Consider \code{x} a numeric vector representing the squared error of
+base models in a given observation. By applying the erfc function on
+the error, the weight of a given model decays exponentially as its
+loss increases.
 }
 \examples{
-
 \dontrun{
   erfc(.1)
   erfc(c(.1, .7))
 }
 
+}
+\references{
+Cerqueira, Vitor; Torgo, Luis; Oliveira, Mariana,
+and Bernhard Pfahringer. "Dynamic and Heterogeneous Ensembles
+for Time Series Forecasting." Data Science and Advanced
+Analytics (DSAA), 2017 IEEE International Conference on. IEEE, 2017.
 }

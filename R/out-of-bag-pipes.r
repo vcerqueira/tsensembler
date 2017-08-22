@@ -1,53 +1,75 @@
-#' out-of-bag function
+#' Out-of-bag loss estimations
 #'
-#' use training data to get oob samples to train the meta-learners
+#' A pipeline for retrieving out-of-bag loss estimations
 #'
-#' @param train train set from the training set
-#' @param test test set from the training set
-#' @param form formula
-#' @param learner base learners
-#' @param learner.pars pars
-#' @param embedding.dimension k size
+#' @param train train set from the training set;
 #'
-#' @return M.ae containing the ae of M and oob.train, which contains
-#' the oob samples
+#' @param test test set from the training set;
+#'
+#' @param form formula;
+#'
+#' @param specs object of class \code{\link{model_specs-class}}. Contains
+#' the specifications of the base models.
+#'
+#' @family out-of-bag functions
+#'
+#'
+#' @return A list containing two objects:
+#' \describe{
+#' \item{mloss}{loss of base models in \strong{test}}
+#' \item{oob}{out-of-bag test samples}
+#' }
 #'
 #' @export
-OOB.fun <- function(train, test, form, learner, learner.pars, embedding.dimension) {
-  M <- learnM(form, train, learner, learner.pars, embedding.dimension)
+intraining_estimations <- function(train, test, form, specs) {
+  utils::capture.output(M <- build_base_ensemble(form, train, specs))
   Y <- get_y(test, form)
 
-  y_hat <- predict(M, test)
-  M.ae <- loss_M(y_hat, prop = TRUE, lossFUN = ae)
+  Y_hat <- predict(M, test)
+  model_loss <- base_models_loss(Y_hat, Y, ae)
 
-  list(M.ae = M.ae, oob.train = test)
+  list(mloss = model_loss, oob = test)
 }
 
-#' oob function for predictions fun
-#' it return out of bag predictions
+#' Out-of-bag predictions
 #'
-#' @inheritParams OOB.fun
+#' A pipeline for retrieving out-of-bag predictions
+#' from the base models
+#'
+#' @inheritParams intraining_estimations
+#'
+#' @family out-of-bag functions
+#'
+#' @keywords internal
 #'
 #' @export
-OOB.fun.hat <- function(train, test, form, learner, learner.pars, embedding.dimension) {
-  M <- learnM(form, train, learner, learner.pars, embedding.dimension)
+intraining_predictions <- function(train, test, form, specs) {
+  utils::capture.output(M <- build_base_ensemble(form, train, specs))
   Y <- get_y(test, form)
 
-  Y_hat <- prop_hat(predict(M, test))
+  Y_hat <- predict(M, test)
 
   cbind.data.frame(target = Y, Y_hat)
 }
 
-#' Forward Validation Procedure
+#' Prequential Procedure in Blocks
 #'
-#' @param x data to split into \code{nfolds}
-#' @param nfolds number of blocks to split data into
-#' @param FUN to apply to train/test
-#' @param .rbind logical. rbind results from FUN?
+#' @param x data to split into \code{nfolds} blocks;
+#'
+#' @param nfolds number of blocks to split data into;
+#'
+#' @param FUN to apply to train/test;
+#'
+#' @param .rbind logical. If TRUE, the results from
+#' FUN are \strong{rbind}ed;
+#'
 #' @param ... further parameters to FUN
 #'
+#' @seealso \code{\link{intraining_estimations}} 
+#' function to use as \strong{FUN} parameter.
+#'
 #' @export
-ForwardValidation <- function(x, nfolds, FUN, .rbind = TRUE, ...) {
+blocked_prequential <- function(x, nfolds, FUN, .rbind = TRUE, ...) {
   f <- cut(seq_len(NROW(x)), breaks = nfolds, labels = FALSE)
 
   cv.res <- list()
@@ -60,23 +82,7 @@ ForwardValidation <- function(x, nfolds, FUN, .rbind = TRUE, ...) {
     test  <- x[ts.id, ]
     cv.res[[i]] <- FUN(train, test, ...)
   }
-  if (.rbind) cv.res <- rbind_(cv.res)
+  if (.rbind) cv.res <- rbind_l(cv.res)
 
   cv.res
-}
-
-#' holdout Procedure for oob
-#'
-#' @param x data
-#' @param estimation.ratio ratio of obsrevation to train
-#' @param FUN to apply to train/test
-#' @param ... further parameters to FUN
-#'
-#' @export
-holdout <- function(x, estimation.ratio, FUN, ...) {
-  len <- NROW(x)
-  train <- x[ seq_len(estimation.ratio * len), ]
-  test <-  x[-seq_len(estimation.ratio * len), ]
-
-  FUN(train, test, ...)
 }

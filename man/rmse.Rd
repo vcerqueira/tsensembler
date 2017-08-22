@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.r
 \name{rmse}
 \alias{rmse}
-\title{rmse}
+\title{Computing the root mean squared error}
 \usage{
 rmse(y, y_hat)
 }
@@ -14,3 +14,4 @@ rmse(y, y_hat)
 \description{
 Utility function to compute Root Mean Squared Error (RMSE)
 }
+\keyword{internal}

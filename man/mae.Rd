@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.r
 \name{mae}
 \alias{mae}
-\title{mae}
+\title{Computing the mean absolute error}
 \usage{
 mae(y, y_hat)
 }
@@ -14,3 +14,9 @@ mae(y, y_hat)
 \description{
 Mean Absolute Error loss function.
 }
+\seealso{
+Other error/performance functions: \code{\link{ae}},
+  \code{\link{mase}}, \code{\link{mse}},
+  \code{\link{r_squared}}, \code{\link{se}}
+}
+\keyword{internal}

@@ -4,22 +4,25 @@
 \alias{FIFO}
 \title{First-In First Out}
 \usage{
-FIFO(x, .in)
+FIFO(x, inval)
 }
 \arguments{
-\item{x}{Vector}
+\item{x}{a vector;}
 
-\item{.in}{New input value for vector x of the same class as \code{class(vector)}}
+\item{inval}{new input value for vector x of the same
+mode as \code{vector}}
 }
 \value{
 A new vector \code{x}
 }
 \description{
-First-In First Out utility function inserts a new value \code{.in} into
-a given sequential vector \code{x}, dropping the last value of the sequence
+First-In First Out utility function inserts a
+new value \code{inval} into a given sequential vector
+\code{x}, dropping the last value of the sequence
 }
 \examples{
 FIFO(1:10, 11)
 FIFO(LETTERS[1:10], letters[1])
 
 }
+\keyword{internal}

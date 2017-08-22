@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.r
 \name{mase}
 \alias{mase}
-\title{Mean absolute Scaled Error}
+\title{Computing the mean absolute scaled error}
 \usage{
 mase(y, y_hat)
 }
@@ -15,3 +15,9 @@ mase(y, y_hat)
 Mean absolute scaled error using the previous value as
 baseline (i.e. a random walk)
 }
+\seealso{
+Other error/performance functions: \code{\link{ae}},
+  \code{\link{mae}}, \code{\link{mse}},
+  \code{\link{r_squared}}, \code{\link{se}}
+}
+\keyword{internal}

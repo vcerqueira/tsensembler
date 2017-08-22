@@ -2,14 +2,15 @@
 % Please edit documentation in R/utils.R
 \name{normalize}
 \alias{normalize}
-\title{normalize}
+\title{Scale a numeric vector using max-min}
 \usage{
 normalize(x, ...)
 }
 \arguments{
 \item{x}{a numeric vector.}
 
-\item{...}{Further arguments to min and max function (e.g. na.rm = TRUE)}
+\item{...}{Further arguments to min and max function
+(e.g. na.rm = TRUE)}
 }
 \value{
 a linearly normalized vector
@@ -23,3 +24,4 @@ normalize(1:10)
 normalize(c(1,2,NA,4), na.rm = TRUE)
 
 }
+\keyword{internal}

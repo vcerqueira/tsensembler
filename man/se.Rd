@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.r
 \name{se}
 \alias{se}
-\title{se}
+\title{Computing the squared error}
 \usage{
 se(y, y_hat)
 }
@@ -17,3 +17,9 @@ squared error of forecasted values.
 \description{
 Utility function to compute pointwise squared error (SE)
 }
+\seealso{
+Other error/performance functions: \code{\link{ae}},
+  \code{\link{mae}}, \code{\link{mase}}, \code{\link{mse}},
+  \code{\link{r_squared}}
+}
+\keyword{internal}

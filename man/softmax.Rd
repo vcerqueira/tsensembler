@@ -2,16 +2,15 @@
 % Please edit documentation in R/utils.R
 \name{softmax}
 \alias{softmax}
-\title{Softmax function}
+\title{Computing the softmax}
 \usage{
 softmax(x)
 }
 \arguments{
 \item{x}{numeric vector}
 }
-\value{
-squashed values according to the softmax
-}
 \description{
-Softmax function
+This function computes the softmax function in
+a numeric vector
 }
+\keyword{internal}

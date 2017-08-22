@@ -1,48 +1,31 @@
 Package: tsensembler
-Title: Ensembles for Time Series Forecasting
+Title: Dynamic Ensembles for Time Series Forecasting
 Version: 0.0.1
 Authors@R: c(person("Vitor", "Cerqueira", email = "cerqueira.vitormanuel@gmail.com", role = c("aut", "cre")),
 			 person("Luis", "Torgo", role = "ctb"),
-			 person("Mariana", "Oliveira", role = "ctb"))
-Description: This package provides methods and tools for ensemble learning
-    for time series forecasting tasks. It is versatile but easy to use framework
-    that calls learning methods from other R libraries, such as nnet, kernlab
-    or forecast. Available methods range from bagged trees to the classical
-    autoregressive methods.
-Depends:
-    R (>= 3.2.3),
-    performanceEstimation (>= 1.0.2)
+             person("Carlos", "Soares", role = "ctb"))
+Author: Vitor Cerqueira [aut, cre],
+        Luis Torgo [ctb],
+        Carlos Soares [ctb]
+Maintainer: Vitor Cerqueira <cerqueira.vitormanuel@gmail.com>
+Description: A framework for dynamically combining forecasting models for time series forecasting predictive tasks. It leverages machine learning models from other packages to automatically combine expert advice using metalearning and other state-of-the-art forecasting combination approaches. The predictive methods receive a data matrix as input, representing an embedded time series, and return a predictive ensemble model. The ensemble use generic functions 'predict' and 'forecast' to forecast future values of the time series. Moreover, an ensemble can be updated using methods, such as 'update_weights' or 'update_base_models'.
 Imports:
-    xts (>= 0.9-7),
+    xts,
     RcppRoll,
     methods,
-    forecast,
     ranger,
-    rpart,
     glmnet,
     earth,
     kernlab,
     Cubist,
     nnet,
     gbm,
-    deepnet,
     zoo,
-    caret,
-    moments,
-    nonlinearTseries,
-    Rwave,
-    tseries,
-    rugarch,
-    igraph,
-    softImpute
+    pls
 Suggests:
-    knitr,
-    rmarkdown,
     testthat
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
-VignetteBuilder: knitr
 URL: http://github.com/vcerqueira/tsensembler
-BugReports: cerqueira.vitormanuel@gmail.com

@@ -2,21 +2,27 @@
 % Please edit documentation in R/utils.R
 \name{split_by}
 \alias{split_by}
+\alias{split_by_}
+\alias{split_by.}
 \title{Splitting expressions by pattern}
 \usage{
 split_by(expr, split, unlist. = TRUE, ...)
+
+split_by_(expr, ...)
+
+split_by.(expr, ...)
 }
 \arguments{
-\item{expr}{character expression to split}
+\item{expr}{character expression to split;}
 
-\item{split}{expression to split \code{expr} by}
+\item{split}{expression to split \code{expr} by;}
 
-\item{unlist.}{Logical. If TRUE, the splitted \code{expr} is unlisted.}
+\item{unlist.}{Logical. If TRUE, the splitted \code{expr} is unlisted;}
 
-\item{...}{Further parameters to pass to \code{strsplit}}
+\item{...}{Further parameters to pass to \code{strsplit};}
 }
 \value{
-a vector with a splitted expression
+a list or vector with a splitted expression
 }
 \description{
 This is an utility function that can be used to split expressions.
@@ -31,3 +37,4 @@ split_by.("time.series")
 split_by("born2bewild", "2")
 
 }
+\keyword{internal}

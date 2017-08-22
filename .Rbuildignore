@@ -1,7 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^data-raw$
-^blackboard$
-^experimental-setups$
-^Data_KDD17$
-^Data_ECML17$
+^.gitignore$
+^.Rhistory$
+^tsensembler\.Rproj$

@@ -2,7 +2,7 @@
 % Please edit documentation in R/metrics.r
 \name{mse}
 \alias{mse}
-\title{mse}
+\title{Computing the mean squared error}
 \usage{
 mse(y, y_hat)
 }
@@ -14,3 +14,9 @@ mse(y, y_hat)
 \description{
 Utility function to compute mean squared error (MSE)
 }
+\seealso{
+Other error/performance functions: \code{\link{ae}},
+  \code{\link{mae}}, \code{\link{mase}},
+  \code{\link{r_squared}}, \code{\link{se}}
+}
+\keyword{internal}

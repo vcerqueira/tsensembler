@@ -21,3 +21,4 @@ vapply extension for character values
 \seealso{
 \code{\link{vapply}}
 }
+\keyword{internal}
