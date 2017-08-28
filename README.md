@@ -12,6 +12,8 @@ Install the package using your R console:
 
 `install.packages('tsensembler') ## in a few days` 
 
+or
+
 `devtools::install_github('vcerqueira/tsensembler')`
 
 
