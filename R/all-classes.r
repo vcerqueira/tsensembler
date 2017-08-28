@@ -495,7 +495,6 @@ setMethod("show",
 #' \strong{update_weights}.
 #'
 #' @examples
-#' \dontrun{
 #' specs <- model_specs(
 #'   learner = c("bm_ppr", "bm_glm", "bm_svr", "bm_mars"),
 #'   learner_pars = list(
@@ -508,9 +507,10 @@ setMethod("show",
 #'
 #' data("water_consumption")
 #' train <- embed_timeseries(water_consumption, 5)
+#' train <- train[1:300, ] # toy size for checks
 #'
 #' model <- ADE(target ~., train, specs)
-#' }
+#' 
 #'
 #' @export
 setClass("ADE",
@@ -588,17 +588,21 @@ setClass("ADE",
 #' \strong{update_weights}.
 #'
 #' @examples
-#' \dontrun{
 #' specs <- model_specs(
-#'  learner = c("bm_svr", "bm_glm", "bm_mars"),
-#'  learner_pars = NULL
+#'   learner = c("bm_ppr", "bm_glm", "bm_svr", "bm_mars"),
+#'   learner_pars = list(
+#'     bm_glm = list(alpha = c(0, .5, 1)),
+#'     bm_svr = list(kernel = c("rbfdot", "polydot"),
+#'                   C = c(1, 3)),
+#'     bm_ppr = list(nterms = 4)
+#'   )
 #' )
 #'
 #' data("water_consumption")
 #' train <- embed_timeseries(water_consumption, 5)
+#' train <- train[1:300, ] # toy size for checks
 #'
 #' model <- ADE(target ~., train, specs)
-#' }
 #'
 #' @export
 "ADE" <-
@@ -792,8 +796,9 @@ ade_hat <- function(y_hat, Y_hat, Y_committee, E_hat) {
 #'
 #' @examples
 #' specs <- model_specs(
-#'  learner = c("bm_randomforest", "bm_ppr", "bm_mars"),
-#'  learner_pars = NULL
+#'  c("bm_ppr", "bm_svr"),
+#'  list(bm_ppr = list(nterms = c(2, 4)),
+#'       bm_svr = list(kernel = c("vanilladot", "polydot"), C = c(1,5)))
 #' )
 #'
 #' data("water_consumption")
@@ -875,9 +880,10 @@ setClass("DETS",
 #'
 #' @examples
 #' specs <- model_specs(
-#'  learner = c("bm_randomforest", "bm_ppr", "bm_mars"),
-#'  learner_pars = NULL
-#' );
+#'  c("bm_ppr", "bm_svr"),
+#'  list(bm_ppr = list(nterms = c(2, 4)),
+#'       bm_svr = list(kernel = c("vanilladot", "polydot"), C = c(1,5)))
+#' )
 #'
 #' data("water_consumption");
 #' train <- embed_timeseries(water_consumption, 5);

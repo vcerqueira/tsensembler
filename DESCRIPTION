@@ -8,7 +8,7 @@ Author: Vitor Cerqueira [aut, cre],
         Luis Torgo [ctb],
         Carlos Soares [ctb]
 Maintainer: Vitor Cerqueira <cerqueira.vitormanuel@gmail.com>
-Description: A framework for dynamically combining forecasting models for time series forecasting predictive tasks. It leverages machine learning models from other packages to automatically combine expert advice using metalearning and other state-of-the-art forecasting combination approaches. The predictive methods receive a data matrix as input, representing an embedded time series, and return a predictive ensemble model. The ensemble use generic functions 'predict' and 'forecast' to forecast future values of the time series. Moreover, an ensemble can be updated using methods, such as 'update_weights' or 'update_base_models'.
+Description: A framework for dynamically combining forecasting models for time series forecasting predictive tasks. It leverages machine learning models from other packages to automatically combine expert advice using metalearning and other state-of-the-art forecasting combination approaches. The predictive methods receive a data matrix as input, representing an embedded time series, and return a predictive ensemble model. The ensemble use generic functions 'predict()' and 'forecast()' to forecast future values of the time series. Moreover, an ensemble can be updated using methods, such as 'update_weights()' or 'update_base_models()'. A complete description of the methods can be found in: Cerqueira, V., Torgo, L., Pinto, F., and Soares, C. "Arbitrated Ensemble for Time Series Forecasting." to appear at: Joint European Conference on Machine Learning and Knowledge Discovery in Databases. Springer International Publishing, 2017.
 Imports:
     xts,
     RcppRoll,
