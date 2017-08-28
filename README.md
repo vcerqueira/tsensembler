@@ -10,7 +10,7 @@ The package provided methods for dynamically combining forecasting models for ti
 
 Install the package using your R console:
 
-`install.packages('tsensembler') ## in a few days!` 
+`install.packages('tsensembler') ## in a few days` 
 
 `devtools::install_github('vcerqueira/tsensembler')`
 
