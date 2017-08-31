@@ -33,12 +33,12 @@ Otherwise, if consecutive know observations are predicted
 (e.g. a validation/test set) the updating is automatically done internally.
 }
 \examples{
-\dontrun{
 data("water_consumption")
 dataset <- embed_timeseries(water_consumption, 5)
 
-train <- dataset[1:1000,]
-test <- dataset[1001:1010, ]
+# toy size for checks
+train <- dataset[1:300,]
+test <- dataset[301:305, ]
 
 specs <- model_specs(c("bm_ppr","bm_glm","bm_mars"), NULL)
 ## same with model <- DETS(target ~., train, specs)
@@ -58,7 +58,7 @@ for (i in seq_along(predictions)) {
 }
 
 all.equal(predictions1, predictions)
-}
+
 
 }
 \seealso{

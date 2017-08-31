@@ -54,9 +54,10 @@ are:
 }
 \examples{
 specs <- model_specs(
- learner = c("bm_randomforest", "bm_ppr", "bm_mars"),
- learner_pars = NULL
-);
+ c("bm_ppr", "bm_svr"),
+ list(bm_ppr = list(nterms = c(2, 4)),
+      bm_svr = list(kernel = c("vanilladot", "polydot"), C = c(1,5)))
+)
 
 data("water_consumption");
 train <- embed_timeseries(water_consumption, 5);

@@ -33,11 +33,11 @@ have the same structure as the one used to build the
 ensemble.
 }
 \examples{
-\dontrun{
 data("water_consumption")
 dataset <- embed_timeseries(water_consumption, 5)
-train <- dataset[1:1000,]
-test <- dataset[1001:1010, ]
+# toy size for checks execution time
+train <- dataset[1:300,]
+test <- dataset[301:305, ]
 
 specs <- model_specs(c("bm_ppr","bm_glm","bm_mars"), NULL)
 
@@ -70,7 +70,7 @@ for (i in seq_along(predictions)) {
   else
     modeldets <- update_weights(modeldets, test[seq_len(i), ])
 }
-}
+
 
 }
 \seealso{

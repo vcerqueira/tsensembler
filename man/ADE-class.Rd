@@ -50,13 +50,25 @@ a single base model is picked to make a prediction. The picked
 model is the one that has the lowest loss prediction from
 the meta models. Defaults to FALSE;}
 
+\item{\code{all_models}}{Logical. If true, at each prediction time,
+all base models are picked to make a prediction. The
+models are weighted according to their predicted loss
+and the \code{aggregation} function. Defaults to FALSE;}
+
+\item{\code{aggregation}}{Type of aggregation used to combine the
+predictions of the base models. The options are:
+\describe{
+ \item{softmax}{default}
+ \item{erfc}{the complementary Gaussian error function}
+ \item{linear}{a linear scaling}
+}}
+
 \item{\code{recent_series}}{the most recent \code{lambda} observations.}
 }}
 
 \examples{
-\dontrun{
 specs <- model_specs(
-  learner = c("bm_ppr", "bm_glm", "bm_svr", "bm_mars"),
+  learner = c("bm_ppr", "bm_glm", "bm_mars"),
   learner_pars = list(
     bm_glm = list(alpha = c(0, .5, 1)),
     bm_svr = list(kernel = c("rbfdot", "polydot"),
@@ -67,9 +79,10 @@ specs <- model_specs(
 
 data("water_consumption")
 train <- embed_timeseries(water_consumption, 5)
+train <- train[1:300, ] # toy size for checks
 
 model <- ADE(target ~., train, specs)
-}
+
 
 }
 \references{

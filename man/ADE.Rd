@@ -4,7 +4,8 @@
 \alias{ADE}
 \title{Arbitrated Dynamic Ensemble}
 \usage{
-ADE(form, data, specs, lambda = 50, omega = 0.5, select_best = FALSE)
+ADE(form, data, specs, lambda = 50, omega = 0.5, select_best = FALSE,
+  all_models = FALSE, aggregation = "softmax")
 }
 \arguments{
 \item{form}{formula;}
@@ -31,6 +32,19 @@ Defaults to .5 according to empirical experiments;}
 a single base model is picked to make a prediction. The picked
 model is the one that has the lowest loss prediction from
 the meta models. Defaults to FALSE;}
+
+\item{all_models}{Logical. If true, at each prediction time,
+all base models are picked to make a prediction. The
+models are weighted according to their predicted loss
+and the \code{aggregation} function. Defaults to FALSE;}
+
+\item{aggregation}{Type of aggregation used to combine the
+predictions of the base models. The options are:
+\describe{
+ \item{softmax}{default}
+ \item{erfc}{the complementary Gaussian error function}
+ \item{linear}{a linear scaling}
+}}
 }
 \description{
 Arbitrated Dynamic Ensemble (ADE) is an ensemble approach
@@ -46,17 +60,21 @@ of competence in the input observation, estimated by the
 predictions of the meta-learners.
 }
 \examples{
-\dontrun{
 specs <- model_specs(
- learner = c("bm_svr", "bm_glm", "bm_mars"),
- learner_pars = NULL
+  learner = c("bm_ppr", "bm_glm", "bm_mars"),
+  learner_pars = list(
+    bm_glm = list(alpha = c(0, .5, 1)),
+    bm_svr = list(kernel = c("rbfdot", "polydot"),
+                  C = c(1, 3)),
+    bm_ppr = list(nterms = 4)
+  )
 )
 
 data("water_consumption")
 train <- embed_timeseries(water_consumption, 5)
+train <- train[1:300, ] # toy size for checks
 
 model <- ADE(target ~., train, specs)
-}
 
 }
 \references{

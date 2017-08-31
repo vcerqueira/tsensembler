@@ -32,12 +32,11 @@ top models. The committee is built according to the \emph{lambda} and
 according to the weights and the committee setup.
 }
 \examples{
-\dontrun{
 
 ###### Predicting with an ADE ensemble
 
 specs <- model_specs(
- learner = c("bm_svr", "bm_glm", "bm_mars"),
+ learner = c("bm_glm", "bm_mars"),
  learner_pars = NULL
 )
 
@@ -49,7 +48,7 @@ test <- dataset[1001:1500, ]
 model <- ADE(target ~., train, specs)
 
 preds <- predict(model, test)
-}
+
 
 \dontrun{
 
@@ -62,8 +61,8 @@ specs <- model_specs(
 
 data("water_consumption")
 dataset <- embed_timeseries(water_consumption, 5)
-train <- dataset[1:1000, ]
-test <- dataset[1001:1500, ]
+train <- dataset[1:700, ]
+test <- dataset[701:1000, ]
 
 model <- DETS(target ~., train, specs, lambda = 50, omega = .2)
 

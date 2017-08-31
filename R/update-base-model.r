@@ -25,11 +25,11 @@
 #' while updating the model uses that information to retrain the models.
 #'
 #' @examples
-#' \dontrun{
 #' data("water_consumption")
 #' dataset <- embed_timeseries(water_consumption, 5)
-#' train <- dataset[1:1000,]
-#' test <- dataset[1001:1010, ]
+#' # toy size for checks execution time
+#' train <- dataset[1:300,]
+#' test <- dataset[301:305, ]
 #'
 #' specs <- model_specs(c("bm_ppr","bm_glm","bm_mars"), NULL)
 #'
@@ -62,7 +62,7 @@
 #'   else
 #'     modeldets <- update_weights(modeldets, test[seq_len(i), ])
 #' }
-#' }
+#' 
 #'
 #' @export
 setGeneric("update_base_models",

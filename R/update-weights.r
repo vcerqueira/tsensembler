@@ -23,7 +23,6 @@
 #' for a \code{\link{DETS}} model
 #'
 #' @examples
-#' \dontrun{
 #' data("water_consumption")
 #' dataset <- embed_timeseries(water_consumption, 5)
 #'
@@ -49,7 +48,7 @@
 #' }
 #'
 #' all.equal(predictions1, predictions)
-#' }
+#' 
 #'
 #' @export
 setGeneric("update_weights",

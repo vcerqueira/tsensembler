@@ -468,6 +468,19 @@ setMethod("show",
 #' model is the one that has the lowest loss prediction from
 #' the meta models. Defaults to FALSE;
 #'
+#' @slot all_models Logical. If true, at each prediction time,
+#' all base models are picked to make a prediction. The
+#' models are weighted according to their predicted loss
+#' and the \code{aggregation} function. Defaults to FALSE;
+#'
+#' @slot aggregation Type of aggregation used to combine the
+#' predictions of the base models. The options are:
+#' \describe{
+#'  \item{softmax}{default}
+#'  \item{erfc}{the complementary Gaussian error function}
+#'  \item{linear}{a linear scaling}
+#' }
+#'
 #' @slot recent_series the most recent \code{lambda} observations.
 #'
 #' @references Cerqueira, Vitor; Torgo, Luis; Pinto, Fabio;
@@ -496,7 +509,7 @@ setMethod("show",
 #'
 #' @examples
 #' specs <- model_specs(
-#'   learner = c("bm_ppr", "bm_glm", "bm_svr", "bm_mars"),
+#'   learner = c("bm_ppr", "bm_glm", "bm_mars"),
 #'   learner_pars = list(
 #'     bm_glm = list(alpha = c(0, .5, 1)),
 #'     bm_svr = list(kernel = c("rbfdot", "polydot"),
@@ -510,7 +523,7 @@ setMethod("show",
 #' train <- train[1:300, ] # toy size for checks
 #'
 #' model <- ADE(target ~., train, specs)
-#' 
+#'
 #'
 #' @export
 setClass("ADE",
@@ -521,6 +534,8 @@ setClass("ADE",
                    lambda = "numeric",
                    omega = "OptionalNumeric",
                    select_best = "logical",
+                   all_models = "logical",
+                   aggregation = "character",
                    recent_series = "data.frame")
 )
 
@@ -563,6 +578,19 @@ setClass("ADE",
 #' model is the one that has the lowest loss prediction from
 #' the meta models. Defaults to FALSE;
 #'
+#' @param all_models Logical. If true, at each prediction time,
+#' all base models are picked to make a prediction. The
+#' models are weighted according to their predicted loss
+#' and the \code{aggregation} function. Defaults to FALSE;
+#'
+#' @param aggregation Type of aggregation used to combine the
+#' predictions of the base models. The options are:
+#' \describe{
+#'  \item{softmax}{default}
+#'  \item{erfc}{the complementary Gaussian error function}
+#'  \item{linear}{a linear scaling}
+#' }
+#'
 #' @references Cerqueira, Vitor; Torgo, Luis; Pinto, Fabio;
 #' and Soares, Carlos. "Arbitrated Ensemble for Time Series
 #' Forecasting" to appear at: Joint European Conference on Machine Learning and
@@ -589,7 +617,7 @@ setClass("ADE",
 #'
 #' @examples
 #' specs <- model_specs(
-#'   learner = c("bm_ppr", "bm_glm", "bm_svr", "bm_mars"),
+#'   learner = c("bm_ppr", "bm_glm", "bm_mars"),
 #'   learner_pars = list(
 #'     bm_glm = list(alpha = c(0, .5, 1)),
 #'     bm_svr = list(kernel = c("rbfdot", "polydot"),
@@ -611,7 +639,9 @@ setClass("ADE",
            specs,
            lambda = 50,
            omega = .5,
-           select_best = FALSE) {
+           select_best = FALSE,
+           all_models = FALSE,
+           aggregation = "softmax") {
 
     if (select_best && is.numeric(omega))
       warning(
@@ -619,6 +649,17 @@ setClass("ADE",
         a committee (\"omega\" parameter).
         \"omega\" parameter will be ignored."
         )
+
+    if (all_models && is.numeric(omega))
+      warning(
+        "ADE setup with both selection of all learners and
+        a committee (\"omega\" parameter).
+        \"omega\" parameter will be ignored."
+        )
+
+    if (select_best && all_models)
+      stop("Choose either \"select_best\" or \"all_models\" option.",
+           call. = FALSE)
 
     if (!is.null(omega))
       if (omega >= 1 | omega <= 0)
@@ -646,6 +687,8 @@ setClass("ADE",
       lambda = lambda,
       omega = omega,
       select_best = select_best,
+      all_models = all_models,
+      aggregation = aggregation,
       recent_series = M$recent_series
     )
   }
@@ -997,7 +1040,6 @@ dets_hat <- function(y_hat, Y_hat, Y_committee, W) {
 #' can be used (with successive calls with updates for multi-step forecasting).
 #'
 #' @examples
-#' \dontrun{
 #' specs <- model_specs(
 #'  learner = c("bm_svr", "bm_glm", "bm_mars"),
 #'  learner_pars = NULL
@@ -1005,14 +1047,14 @@ dets_hat <- function(y_hat, Y_hat, Y_committee, W) {
 #'
 #' data("water_consumption")
 #' dataset <- embed_timeseries(water_consumption, 5)
-#' train <- dataset[1:1000, ]
+#' train <- dataset[1:500, ]
 #'
 #' model <- DETS(target ~., train, specs)
 #' model2 <- ADE(target ~., train, specs, lambda = 30)
 #'
 #' next_vals_dets <- forecast(model, h = 2)
 #' next_vals_ade <- forecast(model2, h = 2)
-#' }
+#'
 #'
 #' @export
 setGeneric("forecast",

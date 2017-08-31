@@ -33,7 +33,6 @@ predict methods (\code{\link{predict}})
 can be used (with successive calls with updates for multi-step forecasting).
 }
 \examples{
-\dontrun{
 specs <- model_specs(
  learner = c("bm_svr", "bm_glm", "bm_mars"),
  learner_pars = NULL
@@ -41,14 +40,14 @@ specs <- model_specs(
 
 data("water_consumption")
 dataset <- embed_timeseries(water_consumption, 5)
-train <- dataset[1:1000, ]
+train <- dataset[1:500, ]
 
 model <- DETS(target ~., train, specs)
 model2 <- ADE(target ~., train, specs, lambda = 30)
 
 next_vals_dets <- forecast(model, h = 2)
 next_vals_ade <- forecast(model2, h = 2)
-}
+
 
 }
 \seealso{

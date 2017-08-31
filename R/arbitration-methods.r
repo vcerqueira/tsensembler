@@ -81,8 +81,12 @@ setMethod("show",
             cat("Lambda is set to:", object@lambda, "\n")
             if (object@select_best)
               cat("Selecting the predicted best base model at each point.\n")
+            else if (object@all_models)
+              cat("Combining all models, using a ", object@aggregation, "function.")
             else
               cat("Omega is set to:", object@omega, "\n\n")
+
+
           }
 )
 
@@ -294,7 +298,7 @@ setMethod("update_ade_meta",
 #' model <- update_ade(model, rbind.data.frame(train, validation))
 #'
 #' preds_test <- predict(model, test)
-#' 
+#'
 #'
 #' @export
 setGeneric("update_ade",

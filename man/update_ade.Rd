@@ -24,7 +24,6 @@ is retrained using \code{newdata}.}
 and \code{\link{update_weights}}.
 }
 \examples{
-\dontrun{
 specs <- model_specs(
  learner = c("bm_svr", "bm_glm", "bm_mars"),
  learner_pars = NULL
@@ -32,9 +31,10 @@ specs <- model_specs(
 
 data("water_consumption")
 dataset <- embed_timeseries(water_consumption, 5)
-train <- dataset[1:1000, ]
-validation <- dataset[1001:1200, ]
-test <- dataset[1201:1500, ]
+# toy size for checks
+train <- dataset[1:300, ]
+validation <- dataset[301:400, ]
+test <- dataset[401:500, ]
 
 model <- ADE(target ~., train, specs)
 
@@ -42,7 +42,7 @@ preds_val <- predict(model, validation)
 model <- update_ade(model, rbind.data.frame(train, validation))
 
 preds_test <- predict(model, test)
-}
+
 
 }
 \seealso{

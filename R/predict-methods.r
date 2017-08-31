@@ -22,12 +22,11 @@ NULL
 #' @rdname predict-methods
 #'
 #' @examples
-#' \dontrun{
 #'
 #' ###### Predicting with an ADE ensemble
 #'
 #' specs <- model_specs(
-#'  learner = c("bm_svr", "bm_glm", "bm_mars"),
+#'  learner = c("bm_glm", "bm_mars"),
 #'  learner_pars = NULL
 #' )
 #'
@@ -39,7 +38,7 @@ NULL
 #' model <- ADE(target ~., train, specs)
 #'
 #' preds <- predict(model, test)
-#' }
+#'
 #'
 #' @export
 setMethod("predict",
@@ -56,20 +55,28 @@ setMethod("predict",
 
             E_hat <- as.data.frame(E_hat)
 
-            W <- t(apply(E_hat, 1, model_weighting, na.rm = TRUE))
+            W <- apply(E_hat,
+                       1,
+                       model_weighting,
+                       trans = object@aggregation,
+                       na.rm = TRUE)
+            W <- t(W)
 
-            Y_hat_recent <- predict(object@base_ensemble, object@recent_series)
-            Y_rs <- get_y(object@recent_series, object@form)
+            if (!(object@select_best || object@all_models)) {
+              Y_hat_recent <- predict(object@base_ensemble, object@recent_series)
+              Y_rs <- get_y(object@recent_series, object@form)
 
-            C <-
-              build_committee(
-                rbind.data.frame(Y_hat_recent, Y_hat),
-                c(Y_rs, Y),
-                lambda = object@lambda,
-                omega = object@omega
-              )
+              C <-
+                build_committee(
+                  rbind.data.frame(Y_hat_recent, Y_hat),
+                  c(Y_rs, Y),
+                  lambda = object@lambda,
+                  omega = object@omega
+                )
 
-            C <- C[-seq_len(object@lambda)]
+              C <- C[-seq_len(object@lambda)]
+            } else
+              C <- NULL
 
             if (object@select_best) {
               W <- select_best(W)
@@ -101,8 +108,8 @@ setMethod("predict",
 #'
 #' data("water_consumption")
 #' dataset <- embed_timeseries(water_consumption, 5)
-#' train <- dataset[1:1000, ]
-#' test <- dataset[1001:1500, ]
+#' train <- dataset[1:700, ]
+#' test <- dataset[701:1000, ]
 #'
 #' model <- DETS(target ~., train, specs, lambda = 50, omega = .2)
 #'
