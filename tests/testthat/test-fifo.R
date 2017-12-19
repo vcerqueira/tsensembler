@@ -1,4 +1,4 @@
-context("fifo")
+context("fifo fun")
 
 test_that("fifo length is constant", {
   x <- rnorm(4L)

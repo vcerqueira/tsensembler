@@ -1,4 +1,4 @@
-context("selectbest")
+context("select best")
 
 x <- as.data.frame(matrix(rnorm(20), nrow=5))
 xb <- select_best(x)

@@ -1,4 +1,4 @@
-context("recentseries")
+context("recent series")
 
 specs <- model_specs(learner = c("bm_svr", "bm_glm", "bm_mars"),
                      learner_pars = NULL)

@@ -1,4 +1,4 @@
-context("erfc")
+context("erfc function")
 
 test_that("check mode of x", {
   x <- rnorm(4L)

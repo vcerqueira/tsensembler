@@ -9,22 +9,22 @@ train <- dataset[1:1000,]
 validation <- dataset[1001:1200,]
 test <- dataset[1201:1500,]
 
-capture.output(model <- ADE(target ~ ., train, specs))
+capture.output(ade_model <- ADE(target ~ ., train, specs))
 
 test_that("class ADE", {
-  expect_s4_class(model, "ADE")
+  expect_s4_class(ade_model, "ADE")
 })
 
 test_that("class base ens", {
-  expect_s4_class(model@base_ensemble, "base_ensemble")
+  expect_s4_class(ade_model@base_ensemble, "base_ensemble")
 })
 
 test_that("class metamodel", {
-  expect_true(is.list(model@meta_model))
+  expect_true(is.list(ade_model@meta_model))
 })
 
 test_that("class metamodel", {
-  expect_true(model@omega <= 1 & model@omega > 0)
+  expect_true(ade_model@omega <= 1 & ade_model@omega > 0)
 })
 
 test_that("failing omega", {

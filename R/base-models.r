@@ -106,7 +106,7 @@ bm_ppr <-
               nterms = nterm,
               sm.method = smoother)
 
-        mnames[j] <- paste0("ppr_", nterm, "nterms")
+        mnames[j] <- paste0("ppr_", nterm, "nterms_", smoother)
       }
     }
     names(ensemble) <- mnames
@@ -298,7 +298,7 @@ bm_randomforest <-
             mtry = mtry,
             write.forest = TRUE)
 
-        mnames[j] <- paste0("rf_n", num.trees)
+        mnames[j] <- paste0("rf_n", num.trees, "m", mtry)
       }
     }
     names(ensemble) <- mnames

@@ -1,4 +1,4 @@
-context("predict workflow")
+context("ade predict workflow")
 
 data("water_consumption")
 dataset <- embed_timeseries(water_consumption, 5)
