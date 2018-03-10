@@ -21,6 +21,7 @@
 #' @export
 compute_predictions <-
   function(M, form, data) {
+
     target_var <- get_target(form)
 
     mnames_raw <- names(M)
@@ -35,8 +36,23 @@ compute_predictions <-
           mnames[bm],
           "rf"  = predict(M[[bm]], data)$predictions,
           "gbm" = predict(M[[bm]], data, n.trees = 100),
+          #"xgb" = {
+          #  xgb_predict(M[[bm]], data)
+          #},
+          #"prophet" = {
+          #  predict_prophet(M[[bm]], data)
+          #},
           "mvr" = {
-            predict(M[[bm]])[, , M[[bm]]$best_comp_train]
+            predict_pls_pcr(M[[bm]], data)
+          },
+          #"mvr" = {
+          #  predict(M[[bm]])[, , M[[bm]]$best_comp_train]
+          #},
+          #"ets" = {
+          #  ets_online_forecast(M[[bm]], data)
+          #},
+          "arima" = {
+            arima_offline_forecast(M[[bm]], data)
           },
           "glm" = {
             X_bm <- M[[bm]]$beta@Dimnames[[1]]
@@ -75,6 +91,15 @@ compute_predictions <-
 #' @export
 combine_predictions <-
   function(Y_hat, W, committee = NULL) {
+    if (nrow(Y_hat) != nrow(W)) {
+      stop("in prediction comb, nrow YH differs from W")
+    }
+
+    if (!is.null(committee) && length(committee) != nrow(W)) {
+      stop("in pred comb, lengh C diffs nrow W")
+    }
+
+
     seq. <- seq_len(nrow(Y_hat))
     if (!is.null(committee))
       y_hat <-

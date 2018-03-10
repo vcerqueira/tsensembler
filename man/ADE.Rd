@@ -5,7 +5,7 @@
 \title{Arbitrated Dynamic Ensemble}
 \usage{
 ADE(form, data, specs, lambda = 50, omega = 0.5, select_best = FALSE,
-  all_models = FALSE, aggregation = "softmax")
+  all_models = FALSE, aggregation = "linear", sequential_reweight = FALSE)
 }
 \arguments{
 \item{form}{formula;}
@@ -45,6 +45,12 @@ predictions of the base models. The options are:
  \item{erfc}{the complementary Gaussian error function}
  \item{linear}{a linear scaling}
 }}
+
+\item{sequential_reweight}{Besides ensemble heterogeneity we encourage diversity
+explicitly during the aggregation of the output of experts.
+This is achieved by taking into account not only predictions
+of performance produced by the arbiters, but also the
+correlation among experts in a recent window of observations.}
 }
 \description{
 Arbitrated Dynamic Ensemble (ADE) is an ensemble approach

@@ -63,7 +63,7 @@ learning_base_models <-
     base_model <- vector("list", length(learner))
     pre_weights <- vector("list", length(learner))
 
-    cat("Training the base models...\n")
+    cat("\nTraining the base models...\n")
     for (o in seq_along(learner)) {
       cat("Base model:", learner[o],"\n")
       utils::capture.output(base_model[[o]] <-
@@ -77,7 +77,7 @@ learning_base_models <-
 
     W <- vnapply(pre_weights,
                  function(o) mse(Y_tr, o))
-    W <- model_weighting(W, trans = "softmax")
+    W <- model_weighting(W, trans = "linear")
 
     list(base_model = base_model, preweights = W)
   }

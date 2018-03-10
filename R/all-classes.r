@@ -361,7 +361,11 @@ model_specs <-
         "bm_svr",
         "bm_mars",
         "bm_cubist",
-        "bm_pls_pcr"
+        "bm_pls_pcr",
+        "bm_prophet",
+        "bm_ets",
+        "bm_auto_arima",
+        "bm_xgb"
         )
 
     if (!all(learner %in% .available_models))
@@ -481,7 +485,15 @@ setMethod("show",
 #'  \item{linear}{a linear scaling}
 #' }
 #'
+#' @slot sequential_reweight Besides ensemble heterogeneity we encourage diversity
+#' explicitly during the aggregation of the output of experts.
+#' This is achieved by taking into account not only predictions
+#' of performance produced by the arbiters, but also the
+#' correlation among experts in a recent window of observations.
+#'
 #' @slot recent_series the most recent \code{lambda} observations.
+#'
+#' @slot out_of_bag oob
 #'
 #' @references Cerqueira, Vitor; Torgo, Luis; Pinto, Fabio;
 #' and Soares, Carlos. "Arbitrated Ensemble for Time Series
@@ -536,7 +548,9 @@ setClass("ADE",
                    select_best = "logical",
                    all_models = "logical",
                    aggregation = "character",
-                   recent_series = "data.frame")
+                   sequential_reweight = "logical",
+                   recent_series = "data.frame",
+                   out_of_bag = "OptionalList")
 )
 
 #' Arbitrated Dynamic Ensemble
@@ -591,6 +605,12 @@ setClass("ADE",
 #'  \item{linear}{a linear scaling}
 #' }
 #'
+#' @param sequential_reweight Besides ensemble heterogeneity we encourage diversity
+#' explicitly during the aggregation of the output of experts.
+#' This is achieved by taking into account not only predictions
+#' of performance produced by the arbiters, but also the
+#' correlation among experts in a recent window of observations.
+#'
 #' @references Cerqueira, Vitor; Torgo, Luis; Pinto, Fabio;
 #' and Soares, Carlos. "Arbitrated Ensemble for Time Series
 #' Forecasting" to appear at: Joint European Conference on Machine Learning and
@@ -641,7 +661,8 @@ setClass("ADE",
            omega = .5,
            select_best = FALSE,
            all_models = FALSE,
-           aggregation = "softmax") {
+           aggregation = "linear",
+           sequential_reweight = FALSE) {
 
     if (select_best && is.numeric(omega))
       warning(
@@ -675,8 +696,8 @@ setClass("ADE",
         form = form,
         train = data,
         specs = specs,
-        lambda = lambda
-      )
+        lambda = lambda,
+        lfun = ae)
 
     methods::new(
       "ADE",
@@ -689,7 +710,9 @@ setClass("ADE",
       select_best = select_best,
       all_models = all_models,
       aggregation = aggregation,
-      recent_series = M$recent_series
+      sequential_reweight = sequential_reweight,
+      recent_series = M$recent_series,
+      out_of_bag = M$OOB
     )
   }
 
@@ -727,7 +750,6 @@ setClass("ade_hat",
                    Y_committee = "OptionalList",
                    E_hat = "data.frame")
 )
-
 
 
 #' Predictions by an ADE ensemble
@@ -819,6 +841,11 @@ ade_hat <- function(y_hat, Y_hat, Y_committee, E_hat) {
 #' to their performance in the last \emph{lambda} observations.
 #' Defaults to .5 according to empirical experiments;
 #'
+#' @slot select_best Logical. If true, at each prediction time,
+#' a single base model is picked to make a prediction. The picked
+#' model is the one that has the lowest loss prediction from
+#' the meta models. Defaults to FALSE;
+#'
 #' @slot recent_series the most recent \code{lambda} observations.
 #'
 #' @references Cerqueira, Vitor; Torgo, Luis; Oliveira, Mariana,
@@ -856,6 +883,7 @@ setClass("DETS",
                    specs = "model_specs",
                    lambda = "OptionalNumeric",
                    omega = "OptionalNumeric",
+                   select_best = "logical",
                    recent_series = "data.frame")
 )
 
@@ -905,6 +933,11 @@ setClass("DETS",
 #' to their performance in the last \emph{lambda} observations.
 #' Defaults to .5 according to empirical experiments;
 #'
+#' @param select_best Logical. If true, at each prediction time,
+#' a single base model is picked to make a prediction. The picked
+#' model is the one that has the lowest loss prediction from
+#' the meta models. Defaults to FALSE;
+#'
 #' @references Cerqueira, Vitor; Torgo, Luis; Oliveira, Mariana,
 #' and Bernhard Pfahringer. "Dynamic and Heterogeneous Ensembles
 #' for Time Series Forecasting." Data Science and Advanced
@@ -939,7 +972,8 @@ setClass("DETS",
            data,
            specs,
            lambda = 50,
-           omega = .5) {
+           omega = .5,
+           select_best = FALSE) {
 
     M <- build_base_ensemble(form, data, specs)
 
@@ -952,6 +986,7 @@ setClass("DETS",
       specs = specs,
       lambda = lambda,
       omega = omega,
+      select_best = select_best,
       recent_series = recent_lambda_k
     )
   }

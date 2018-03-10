@@ -201,7 +201,7 @@ normalize <-
 proportion <-
   function(x, ...) {
     if (!methods::is(x, "numeric"))
-      x <- unlistn(x)
+      x <- unlist(x)
     if (length(x) == 1L)
       return(1)
     if (stats::var(x, na.rm = T) == 0)
@@ -370,7 +370,7 @@ are_pars_valid <-
                c("alpha")
              },
              "bm_gbm" = {
-               c("interaction.depth", "shrinkage", "n.trees")
+               c("interaction.depth", "shrinkage", "n.trees","dist")
              },
              "bm_ffnn" = {
                c("size", "decay", "maxit")
@@ -404,3 +404,28 @@ are_pars_valid <-
     }
   }
 
+extended_weights <-
+  function(W, C) {
+    stopifnot(NROW(W) == length(C))
+
+    seq. <- seq_len(NROW(W))
+
+    weightsf <-
+      vapply(seq.,
+             function(j) {
+               W[j, C[[j]]] <- proportion(W[j, C[[j]]])
+               W[j,-C[[j]]] <- 0.
+               W[j, ]
+             }, double(NCOL(W)))
+
+    t(weightsf)
+  }
+
+subset_corr_matrix <-
+  function(x, model) {
+    corrs <- x[model,]
+    corrs[!names(corrs) %in% model]
+  }
+
+get_embedcols <-
+  function(x) grepl("^Tm[0-9]?[0-9]$", colnames(x))

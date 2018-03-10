@@ -53,6 +53,7 @@ select_best <- function(model_scores) {
 #' @export
 model_recent_performance <-
   function(Y_hat, Y, lambda, omega, pre_weights) {
+    cat("using old rp\n")
     sqr_err <-
       vapply(Y_hat,
              function(p) {
@@ -96,7 +97,7 @@ EMASE <- function(loss, lambda, pre_weights) {
   scores <-
     apply(MASE,
           1,
-          model_weighting, trans = "erfc", na.rm = TRUE)
+          model_weighting, trans = "linear", na.rm = TRUE)
 
   scores <- data.frame(t(scores))
 
@@ -124,7 +125,7 @@ get_top_models <- function(scores, omega) {
   threshold <- 1. - omega
 
   model_scores <-
-    transform(scores, beta = apply(scores, 1, stats::quantile, threshold))
+    transform(scores, beta = apply(scores, 1, stats::quantile, threshold, na.rm = TRUE))
 
   B <- pmatch("beta", colnames(model_scores))
 
@@ -175,7 +176,7 @@ build_committee <-
     rolled_loss <- rbind.data.frame(rep(1., times = ncol(Y_loss)),
                                     rolled_loss[-NROW(rolled_loss), ])
 
-    beta <- apply(rolled_loss, 1, stats::quantile, probs = omega)
+    beta <- apply(rolled_loss, 1, stats::quantile, probs = omega, na.rm = TRUE)
 
     C <- l1apply(rolled_loss, function(j) {
       which(rolled_loss[j, ] < beta[j])
@@ -221,11 +222,20 @@ build_committee <-
 #'
 #' @export
 model_weighting <- function(x, trans = "softmax", ...) {
-  if (!trans %in% c("softmax", "linear", "erfc"))
+  if (!trans %in% c("softmax", "linear", "erfc", "erfcmax"))
     stop("Please choose a proper model weighting strategy\n", call. = FALSE)
 
   if (is.list(x))
     x <- unlistn(x)
+
+  if (all(is.na(x))) {
+    warning("in model_weighting, all vector is na.")
+    return(rep(1/length(x), times = length(x)))
+  }
+
+  if (any(is.na(x))) {
+    x[is.na(x)] <- max(x, na.rm=TRUE)
+  }
 
   if (trans == "softmax") {
     w <- NA_real_
@@ -236,6 +246,9 @@ model_weighting <- function(x, trans = "softmax", ...) {
   } else if (trans == "linear") {
     nx <- normalize(-x, ...)
     w <- proportion(nx)
+  } else if (trans == "erfcmax") {
+    e_f <- erfc(x, alpha = 1/max(x))
+    w <- e_f / sum(e_f)
   } else {
     nx <- normalize(x, ...)
     e_nx <- erfc(nx)
@@ -265,18 +278,22 @@ struc_embed <-
 #'
 #' @param Y true values from the time series;
 #'
-#' @param loss_function loss function to compute. Defaults to \code{ae}, absolute
+#' @param lfun loss function to compute. Defaults to \code{ae}, absolute
 #' error
 #' @keywords internal
 #'
 #' @export
 base_models_loss <-
-  function(Y_hat, Y, loss_function = ae) {
+  function(Y_hat, Y, lfun = se, Y_tr = 1) {
+    
+    alpha <- .3
+    #Y_combined <- rowMeans(Y_hat)
+
     models_loss <-
-      lapply(Y_hat,
-             function(o) {
-               loss_function(o, Y)
-             })
+        lapply(Y_hat,
+               function(o) {
+                 lfun(Y, o, Y_hat, alpha, Y_tr)
+               })
 
     as.data.frame(models_loss)
   }

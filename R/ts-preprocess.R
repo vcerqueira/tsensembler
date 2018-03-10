@@ -45,3 +45,15 @@ embed_timeseries <- function(timeseries, embedding.dimension) {
 
   df
 }
+
+#' Soft Imputation
+#' 
+#' @param x data
+#' 
+#' @import softImpute
+#' 
+#' @export
+soft.completion <- function(x) {
+  if ("data.frame" %in% class(x)) x <- as.matrix(x)
+  as.data.frame(complete(x, softImpute(x)))
+}

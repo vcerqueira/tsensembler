@@ -4,7 +4,7 @@
 \alias{DETS}
 \title{Dynamic Ensemble for Time Series}
 \usage{
-DETS(form, data, specs, lambda = 50, omega = 0.5)
+DETS(form, data, specs, lambda = 50, omega = 0.5, select_best = FALSE)
 }
 \arguments{
 \item{form}{formula;}
@@ -26,6 +26,11 @@ Defaults to 50 according to empirical experiments;}
 models are selected and weighted at each prediction instance, according
 to their performance in the last \emph{lambda} observations.
 Defaults to .5 according to empirical experiments;}
+
+\item{select_best}{Logical. If true, at each prediction time,
+a single base model is picked to make a prediction. The picked
+model is the one that has the lowest loss prediction from
+the meta models. Defaults to FALSE;}
 }
 \description{
 A Dynamic Ensemble for Time Series (DETS). The DETS ensemble

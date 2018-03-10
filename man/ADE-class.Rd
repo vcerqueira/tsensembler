@@ -63,7 +63,15 @@ predictions of the base models. The options are:
  \item{linear}{a linear scaling}
 }}
 
+\item{\code{sequential_reweight}}{Besides ensemble heterogeneity we encourage diversity
+explicitly during the aggregation of the output of experts.
+This is achieved by taking into account not only predictions
+of performance produced by the arbiters, but also the
+correlation among experts in a recent window of observations.}
+
 \item{\code{recent_series}}{the most recent \code{lambda} observations.}
+
+\item{\code{out_of_bag}}{oob}
 }}
 
 \examples{

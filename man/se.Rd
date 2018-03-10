@@ -4,7 +4,7 @@
 \alias{se}
 \title{Computing the squared error}
 \usage{
-se(y, y_hat)
+se(y, y_hat, ...)
 }
 \arguments{
 \item{y}{A numeric vector representing the actual values.}

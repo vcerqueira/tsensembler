@@ -1,6 +1,6 @@
 Package: tsensembler
 Title: Dynamic Ensembles for Time Series Forecasting
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: c(person("Vitor", "Cerqueira", email = "cerqueira.vitormanuel@gmail.com", role = c("aut", "cre")),
 			 person("Luis", "Torgo", role = "ctb"),
              person("Carlos", "Soares", role = "ctb"))
@@ -21,7 +21,9 @@ Imports:
     nnet,
     gbm,
     zoo,
-    pls
+    pls,
+    forecast,
+    softImpute
 Suggests:
     testthat
 License: GPL (>=2)

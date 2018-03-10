@@ -4,7 +4,7 @@
 \alias{base_models_loss}
 \title{Computing the error of base models}
 \usage{
-base_models_loss(Y_hat, Y, loss_function = ae)
+base_models_loss(Y_hat, Y, lfun = se, Y_tr = 1)
 }
 \arguments{
 \item{Y_hat}{predictions of the base models ("@Y_hat" slot)
@@ -12,7 +12,7 @@ from \code{\link{base_ensemble-class}} object;}
 
 \item{Y}{true values from the time series;}
 
-\item{loss_function}{loss function to compute. Defaults to \code{ae}, absolute
+\item{lfun}{loss function to compute. Defaults to \code{ae}, absolute
 error}
 }
 \description{

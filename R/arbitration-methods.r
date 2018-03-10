@@ -18,14 +18,14 @@
 #' to their performance in the last \emph{lambda} observations.
 #' Defaults to 50 according to empirical experiments;
 #'
+#' @param lfun meta loss function
+#'
 #' @keywords internal
 #'
 #' @export
 "train_ade" <-
-  function(form, train, specs, lambda) {
+  function(form, train, specs, lambda, lfun) {
     tgt <- get_target(form)
-
-    M <- build_base_ensemble(form, train, specs)
 
     cat("Setting up meta data\n")
     OOB_data <-
@@ -35,37 +35,39 @@
         intraining_estimations,
         .rbind = FALSE,
         form = form,
-        specs = specs
+        specs = specs,
+        lfun = lfun
       )
 
+    cat("Building base ensemble...\n")
+    M <- build_base_ensemble(form, train, specs)
+
     OOB <- rbind_l(lapply(OOB_data, function(x) x$oob))
+    train_loss <- rbind_l(lapply(OOB_data, function(x) x$mloss))
     recent_lambda_k <- recent_lambda_observations(OOB, lambda)
 
-    OOB <- subset(OOB, select = -which(colnames(OOB) %in% tgt))
-
-    train_loss <- rbind_l(lapply(OOB_data, function(x) x$mloss))
+    OOB_no_tgt <- subset(OOB, select = -which(colnames(OOB) %in% tgt))
 
     train_metadata <-
       lapply(train_loss,
-             function(l_hat) cbind.data.frame(OOB,
+             function(l_hat) cbind.data.frame(OOB_no_tgt,
                                               score = l_hat))
 
-    cat("Training meta models (a random forest for each base model\n")
+    cat("Training meta models (an arbiter for each expert\n")
     meta_models <-
       lapply(train_metadata,
              function(meta_set) {
-               cat(".")
-               ranger(score ~ .,
-                      meta_set,
-                      mtry = NCOL(meta_set) / 3,
-                      num.trees = 500,
-                      write.forest = TRUE)
+              if (any(is.na(meta_set))) {
+                meta_set <- soft.completion(meta_set)
+              }
+               loss_meta_learn(score ~ ., meta_set, "randomforest")
              })
 
     list(
       base_ensemble = M,
       meta_model = meta_models,
-      recent_series = recent_lambda_k
+      recent_series = recent_lambda_k,
+      OOB = OOB_data
     )
   }
 
@@ -129,7 +131,6 @@ setMethod("forecast",
 
             forecasts
           })
-
 
 forecast_ade <-
   function(object) {
@@ -223,7 +224,8 @@ setMethod("update_ade_meta",
                 intraining_estimations,
                 .rbind = FALSE,
                 form = object@form,
-                specs = object@specs
+                specs = object@specs,
+                lfun = ae
               )
 
             tgt <- get_target(object@form)
@@ -244,11 +246,15 @@ setMethod("update_ade_meta",
             meta_models <-
               lapply(train_metadata,
                      function(meta_set) {
-                       ranger(score ~ .,
-                              meta_set,
-                              mtry = NCOL(meta_set) / 3,
-                              num.trees = 500,
-                              write.forest = TRUE)
+                      if (any(is.na(meta_set))) {
+                        meta_set <- soft.completion(meta_set)
+                      }
+
+                      ranger(score ~ .,
+                             meta_set,
+                             mtry = NCOL(meta_set) / 3,
+                             num.trees = 500,
+                             write.forest = TRUE)
                      })
 
             object@meta_model <- meta_models

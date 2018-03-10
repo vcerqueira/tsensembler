@@ -45,13 +45,23 @@ bm_gaussianprocess <-
     for (kernel in lpars$bm_gaussianprocess$kernel) {
       for (tolerance in lpars$bm_gaussianprocess$tol) {
         j <- j + 1L
+
+        mnames[j] <- paste("gp", kernel, "krnl", tolerance, "tl", sep = "_")
+        cat(mnames[j],"\n")
+        if (!is.null(lpars$rm_ids)) {
+          if (mnames[j] %in% names(lpars$rm_ids)) {
+            rm_ids <- lpars$rm_ids[[mnames[j]]]
+            data <- data[-rm_ids, ]
+          }
+        }
+
         ensemble[[j]] <-
           gausspr(form,
                   data,
                   type = "regression",
                   kernel = kernel,
                   tol = tolerance)
-        mnames[j] <- paste("gp", kernel, "krnl", sep = "_")
+
       }
     }
     names(ensemble) <- mnames
@@ -100,13 +110,22 @@ bm_ppr <-
     for (nterm in lpars$bm_ppr$nterms) {
       for (smoother in lpars$bm_ppr$sm.method) {
         j <- j + 1L
+        mnames[j] <- paste0("ppr_", nterm, "nterms_", smoother)
+        cat(mnames[j],"\n")
+        if (!is.null(lpars$rm_ids)) {
+          if (mnames[j] %in% names(lpars$rm_ids)) {
+            rm_ids <- lpars$rm_ids[[mnames[j]]]
+            data <- data[-rm_ids, ]
+          }
+        }
+
+
         ensemble[[j]] <-
           ppr(form,
               data,
               nterms = nterm,
               sm.method = smoother)
 
-        mnames[j] <- paste0("ppr_", nterm, "nterms_", smoother)
       }
     }
     names(ensemble) <- mnames
@@ -155,13 +174,6 @@ bm_glm <-
     for (alpha in lpars$bm_glm$alpha) {
       j <- j + 1L
 
-      m.all <- glmnet(X, Y, alpha = alpha)
-      ensemble[[j]] <-
-        glmnet(X,
-               Y,
-               alpha = alpha,
-               lambda = min(m.all$lambda))
-
       if (alpha == 0) {
         mnames[j] <- "glm_ridge"
       } else if (alpha == 1) {
@@ -169,6 +181,24 @@ bm_glm <-
       } else {
         mnames[j] <- paste("glm_enet", alpha, sep = "_")
       }
+      cat(mnames[j],"\n")
+
+      if (!is.null(lpars$rm_ids)) {
+        if (mnames[j] %in% names(lpars$rm_ids)) {
+          cat("ss")
+          rm_ids <- lpars$rm_ids[[mnames[j]]]
+          X <- X[-rm_ids, ]
+          Y <- Y[-rm_ids]
+        }
+      }
+
+      m.all <- glmnet(X, Y, alpha = alpha)
+      ensemble[[j]] <-
+        glmnet(X,
+               Y,
+               alpha = alpha,
+               lambda = min(m.all$lambda))
+
     }
     names(ensemble) <- mnames
 
@@ -210,34 +240,48 @@ bm_gbm <-
     if (is.null(lpars$bm_gbm$shrinkage))
       lpars$bm_gbm$shrinkage <- 0.001
     if (is.null(lpars$bm_gbm$n.trees))
-      lpars$bm_gbm$n.trees <- 100
+      lpars$bm_gbm$n.trees <- 500
+    if (is.null(lpars$bm_gbm$dist))
+      lpars$bm_gbm$dist <- "gaussian"
 
     gbm_p <- lpars$bm_gbm
     nmodels <-
       length(gbm_p$interaction.depth) *
       length(gbm_p$shrinkage) *
-      length(gbm_p$n.trees)
+      length(gbm_p$n.trees) * 
+      length(gbm_p$dist)
 
     j <- 0
     ensemble <- vector("list", nmodels)
     mnames <- character(nmodels)
     for (id in lpars$bm_gbm$interaction.depth) {
-      for (shrinkage in lpars$bm_gbm$shrinkage) {
-        for (n.trees in lpars$bm_gbm$n.trees) {
-          j <- j + 1L
+      for (mdist in lpars$bm_gbm$dist) {
+        for (shrinkage in lpars$bm_gbm$shrinkage) {
+          for (n.trees in lpars$bm_gbm$n.trees) {
+            j <- j + 1L
 
-          ensemble[[j]] <-
-            gbm(
-              form,
-              data,
-              distribution = "gaussian",
-              interaction.depth = id,
-              shrinkage = shrinkage,
-              n.trees = n.trees
-            )
+            mnames[j] <-
+              paste("gbm", mdist, n.trees, "t", id, "id", shrinkage, "sh", sep = "_")
 
-          mnames[j] <-
-            paste("gbm", n.trees, "t", id, "id", shrinkage, "sh", sep = "_")
+            cat(mnames[j],"\n")
+            if (!is.null(lpars$rm_ids)) {
+              if (mnames[j] %in% names(lpars$rm_ids)) {
+                rm_ids <- lpars$rm_ids[[mnames[j]]]
+                data <- data[-rm_ids, ]
+              }
+            }
+
+            ensemble[[j]] <-
+              gbm(
+                form,
+                data,
+                distribution = mdist,
+                interaction.depth = id,
+                shrinkage = shrinkage,
+                n.trees = n.trees
+              )
+
+          }
         }
       }
     }
@@ -276,9 +320,16 @@ bm_randomforest <-
       lpars$bm_randomforest <- list()
 
     if (is.null(lpars$bm_randomforest$num.trees))
-      lpars$bm_randomforest$num.trees <- 100
+      lpars$bm_randomforest$num.trees <- 500
     if (is.null(lpars$bm_randomforest$mtry))
-      lpars$bm_randomforest$mtry <- ncol(data) / 3
+      lpars$bm_randomforest$mtry <- ceiling(ncol(data) / 3)
+
+    bad_mtry <- lpars$bm_randomforest$mtry > (ncol(data) - 1)
+
+    if (any(bad_mtry)) {
+      b_id <- which(bad_mtry)
+      lpars$bm_randomforest$mtry[b_id] <- ceiling(ncol(data) / 3)
+    }
 
     nmodels <-
       length(lpars$bm_randomforest$num.trees) *
@@ -290,6 +341,17 @@ bm_randomforest <-
     for (num.trees in lpars$bm_randomforest$num.trees) {
       for (mtry in lpars$bm_randomforest$mtry) {
         j <- j + 1L
+
+        mnames[j] <- paste0("rf_n", num.trees, "m", mtry)
+        cat(mnames[j],"\n")
+        if (!is.null(lpars$rm_ids)) {
+          if (mnames[j] %in% names(lpars$rm_ids)) {
+            rm_ids <- lpars$rm_ids[[mnames[j]]]
+            data <- data[-rm_ids, ]
+          }
+        }
+
+
         ensemble[[j]] <-
           ranger(
             form,
@@ -297,8 +359,6 @@ bm_randomforest <-
             num.trees = num.trees,
             mtry = mtry,
             write.forest = TRUE)
-
-        mnames[j] <- paste0("rf_n", num.trees, "m", mtry)
       }
     }
     names(ensemble) <- mnames
@@ -335,7 +395,7 @@ bm_cubist <-
       lpars$bm_cubist <- list()
 
     if (is.null(lpars$bm_cubist$committees))
-      lpars$bm_cubist$committees <- 30
+      lpars$bm_cubist$committees <- 50
     if (is.null(lpars$bm_cubist$neighbors))
       lpars$bm_cubist$neighbors <- 0
 
@@ -354,10 +414,22 @@ bm_cubist <-
     for (ncom in lpars$bm_cubist$committees) {
       for (neighbors in lpars$bm_cubist$neighbors) {
         j <- j + 1L
+
+        mnames[j] <- paste0("cub_", ncom, "it", neighbors, "nn")
+        cat(mnames[j],"\n")
+
+        if (!is.null(lpars$rm_ids)) {
+          if (mnames[j] %in% names(lpars$rm_ids)) {
+            rm_ids <- lpars$rm_ids[[mnames[j]]]
+            X <- X[-rm_ids, ]
+            Y <- Y[-rm_ids]
+          }
+        }
+
+
         ensemble[[j]] <-
           cubist(X, Y, committees = ncom, neighbors = neighbors)
 
-        mnames[j] <- paste0("cub_", ncom, "it", neighbors, "nn")
       }
     }
     names(ensemble) <- mnames
@@ -396,7 +468,7 @@ bm_mars <-
       lpars$bm_mars <- list()
 
     if (is.null(lpars$bm_mars$nk))
-      lpars$bm_mars$nk <- 15
+      lpars$bm_mars$nk <- 10
     if (is.null(lpars$bm_mars$degree))
       lpars$bm_mars$degree <- 3
     if (is.null(lpars$bm_mars$thresh))
@@ -414,13 +486,24 @@ bm_mars <-
       for (degree in lpars$bm_mars$degree) {
         for (thresh in lpars$bm_mars$thresh) {
           j <- j + 1L
+
+          mnames[j] <- paste0("mars_nk", nk, "_d", degree, "t", thresh)
+          cat(mnames[j],"\n")
+          if (!is.null(lpars$rm_ids)) {
+            if (mnames[j] %in% names(lpars$rm_ids)) {
+              rm_ids <- lpars$rm_ids[[mnames[j]]]
+              data <- data[-rm_ids, ]
+            }
+          }
+
+
           ensemble[[j]] <-
             earth(form,
                   data,
                   nk = nk,
                   degree = degree,
                   thresh = thresh)
-          mnames[j] <- paste0("mars_nk", nk, "_d", degree, "t", thresh)
+
         }
       }
     }
@@ -484,6 +567,16 @@ bm_svr <-
         for (C in lpars$bm_svr$C) {
           j <- j + 1L
 
+          mnames[j] <- paste0("svm_", kernel, "g", epsilon, "c", C)
+          cat(mnames[j],"\n")
+          if (!is.null(lpars$rm_ids)) {
+            if (mnames[j] %in% names(lpars$rm_ids)) {
+              rm_ids <- lpars$rm_ids[[mnames[j]]]
+              data <- data[-rm_ids, ]
+            }
+          }
+
+
           ensemble[[j]] <-
             ksvm(
               form,
@@ -494,7 +587,6 @@ bm_svr <-
               epsilon = epsilon,
               C = C)
 
-          mnames[j] <- paste0("svm_", kernel, "g", epsilon, "c", C)
         }
       }
     }
@@ -543,7 +635,7 @@ bm_ffnn <-
     if (is.null(lpars$bm_ffnn$decay))
       lpars$bm_ffnn$decay <- 0.01
     if (is.null(lpars$bm_ffnn$maxit))
-      lpars$bm_ffnn$maxit <- 200
+      lpars$bm_ffnn$maxit <- 750
 
     nmodels <-
       length(lpars$bm_ffnn$maxit) *
@@ -558,6 +650,15 @@ bm_ffnn <-
         for (decay in lpars$bm_ffnn$decay) {
           j <- j + 1L
 
+          mnames[j] <- paste0("nnet_s", size, "_d", decay, "m", maxit)
+          cat(mnames[j],"\n")
+          if (!is.null(lpars$rm_ids)) {
+            if (mnames[j] %in% names(lpars$rm_ids)) {
+              rm_ids <- lpars$rm_ids[[mnames[j]]]
+              data <- data[-rm_ids, ]
+            }
+          }
+
           ensemble[[j]] <-
             nnet(
               form,
@@ -570,7 +671,6 @@ bm_ffnn <-
               MaxNWts = 1000000
             )
 
-          mnames[j] <- paste0("nnet_s", size, "_d", decay, "m")
         }
       }
     }
@@ -625,17 +725,34 @@ bm_pls_pcr <-
     for (method in lpars$bm_pls_pcr$method) {
       j <- j + 1L
 
-      ensemble[[j]] <-
-        mvr(formula = form,
-            data = data,
-            method = method)
-
-      ensemble[[j]]$best_comp_train <-
-        best_mvr(ensemble[[j]], form, data)
-
       mnames[j] <- paste("mvr", method, sep = "_")
+      cat(mnames[j],"\n")
+
+      if (!is.null(lpars$rm_ids)) {
+        if (mnames[j] %in% names(lpars$rm_ids)) {
+          rm_ids <- lpars$rm_ids[[mnames[j]]]
+          data <- data[-rm_ids, ]
+        }
+      }
+
+      model <-
+        tryCatch(mvr(formula = form,
+                     data = data,
+                     method = method), error = function(e) NULL)
+
+      if (!is.null(model)) {
+        model$best_comp_train <- best_mvr(model, form, data)
+      } else {
+        mnames[j] <- NA_character_
+      }
+      ensemble[[j]] <- model
     }
-    names(ensemble) <- mnames
+    mnames <- mnames[!is.na(mnames)]
+    ## se nalgum ensemble existe modelo, mete nomes...
+    all_null <- all(sapply(ensemble, is.null))
+    if (!all_null) { ### ensemble
+      names(ensemble) <- mnames
+    }
 
     ensemble
   }
@@ -667,4 +784,138 @@ best_mvr <-
              USE.NAMES = FALSE)
 
     which.min(err_by_comp)
+  }
+
+
+#' pre dsss
+#'
+#' @param model model
+#' @param newdata dn
+#'
+#' @export
+predict_pls_pcr <-
+  function(model, newdata) {
+    bcomp <- model$best_comp_train
+    as.data.frame(predict(model, newdata))[,bcomp]
+  }
+
+
+#' sadadadadasdadas
+#' @param model model
+#' @param newdata dn
+#'
+#' @import forecast
+#' @export
+arima_offline_forecast <-
+  function(model, newdata) {
+    form <- model$form
+    train <- model$trainset
+    xreg_cols <- model$cols_xrg
+    model$cols_xrg <- NULL
+
+    Y_tr <- get_y(train, form)
+    Y_ts <- get_y(newdata, form)
+    Y <- c(Y_tr, Y_ts)
+
+    N <- nrow(train)
+
+    all_data <- rbind.data.frame(train, newdata)
+
+    if (length(xreg_cols) > 0) {
+      xregm <- as.matrix(all_data[, xreg_cols])
+      colnames(xregm) <- colnames(newdata)[xreg_cols]
+    } else {
+      xregm <- NULL
+    }
+
+    arima_m <-
+      Arima(y = Y,
+            xreg = xregm,
+            model = model)
+
+    arima_hat <- stats::fitted(arima_m)[-seq_len(N)]
+
+    arima_hat
+  }
+
+#' sadasasadd
+#'
+#' @param model model
+#' @param newdata nd
+#'
+#'
+#' @import forecast
+#' @export
+arima_online_forecast <-
+  function(model, newdata) {
+    form <- model$form
+    train <- model$trainset
+    xreg_cols <- model$cols_xrg
+    model$cols_xrg <- NULL
+
+    Y_tr <- get_y(train, form)
+    Y_ts <- get_y(newdata, form)
+
+    N <- nrow(train)
+
+    all_data <- rbind.data.frame(train, newdata)
+
+    if (length(xreg_cols) > 0) {
+      xregm_c <- as.matrix(all_data[, xreg_cols])
+      colnames(xregm_c) <- colnames(newdata)[xreg_cols]
+    } else {
+      xregm_c <- NULL
+    }
+
+    arima_hat <- numeric(nrow(newdata))
+    for (j in seq_along(arima_hat)) {
+      xregm <- xregm_c[N+j,]
+
+      arima_hat[j] <- forecast::forecast(model, h = 1)$mean
+
+      Y <- c(Y_tr, Y_ts[seq_len(j)])
+
+      model <- auto.arima(y = Y, xreg = xregm_c[seq_len(N+j), ])
+    }
+
+    arima_hat
+  }
+
+
+#' auto arima bm
+#' @param form form
+#' @param data data
+#' @param lpars ls
+#'
+#' @export
+bm_auto_arima <-
+  function(form, data, lpars) {
+    Y <- get_y(data, form)
+
+    tgt_col <- colnames(data) %in% get_target(form)
+    xreg_cols <- which(!(get_embedcols(data) | tgt_col))
+
+    if (length(xreg_cols) > 0) {
+      xregm <- as.matrix(data[,xreg_cols])
+      colnames(xregm) <- colnames(data)[xreg_cols]
+    } else
+      xregm <- NULL
+
+    auto_arima <- tryCatch(forecast::auto.arima(y = Y, xreg = xregm), error = function(e) NULL)
+    if (is.null(auto_arima)) {
+      auto_arima <- forecast::Arima(Y, order = c(0,0,0))
+    }
+    auto_arima$trainset <- data
+    auto_arima$form <- form
+    auto_arima$cols_xrg <- xreg_cols
+
+    mcoefs <- auto_arima$arma[c(1,5,2)]
+    mcoefs <- paste0(mcoefs, collapse = "")
+
+    auto_arima <- list(auto_arima)
+
+    #names(auto_arima) <- paste("arima", mcoefs, sep = "_")
+    names(auto_arima) <- "arima_auto"
+
+    auto_arima
   }

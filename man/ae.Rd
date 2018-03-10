@@ -4,7 +4,7 @@
 \alias{ae}
 \title{Computing the absolute error}
 \usage{
-ae(y, y_hat)
+ae(y, y_hat, ...)
 }
 \arguments{
 \item{y}{A numeric vector representing the actual values.}

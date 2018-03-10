@@ -12,7 +12,7 @@
 #' @keywords internal
 #'
 #' @export
-se <- function(y, y_hat) {
+se <- function(y, y_hat, ...) {
   stopifnot(length(y) == length(y_hat),
             is.numeric(y),
             is.numeric(y_hat))
@@ -57,7 +57,7 @@ rmse <- function(y, y_hat) sqrt(mse(y, y_hat))
 #' @keywords internal
 #'
 #' @export
-ae <- function(y, y_hat) {
+ae <- function(y, y_hat, ...) {
   stopifnot(length(y) == length(y_hat),
             is.numeric(y),
             is.numeric(y_hat))

@@ -4,7 +4,7 @@
 \alias{train_ade}
 \title{Training procedure of for ADE}
 \usage{
-train_ade(form, train, specs, lambda)
+train_ade(form, train, specs, lambda, lfun)
 }
 \arguments{
 \item{form}{formula;}
@@ -20,6 +20,8 @@ committee ratio \strong{omega}. Essentially, the top \emph{omega}
 models are selected and weighted at each prediction instance, according
 to their performance in the last \emph{lambda} observations.
 Defaults to 50 according to empirical experiments;}
+
+\item{lfun}{meta loss function}
 }
 \description{
 Base level models are trained according to \strong{specs},

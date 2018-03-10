@@ -54,6 +54,11 @@ models are selected and weighted at each prediction instance, according
 to their performance in the last \emph{lambda} observations.
 Defaults to .5 according to empirical experiments;}
 
+\item{\code{select_best}}{Logical. If true, at each prediction time,
+a single base model is picked to make a prediction. The picked
+model is the one that has the lowest loss prediction from
+the meta models. Defaults to FALSE;}
+
 \item{\code{recent_series}}{the most recent \code{lambda} observations.}
 }}
 

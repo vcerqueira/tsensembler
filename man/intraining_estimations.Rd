@@ -4,7 +4,7 @@
 \alias{intraining_estimations}
 \title{Out-of-bag loss estimations}
 \usage{
-intraining_estimations(train, test, form, specs)
+intraining_estimations(train, test, form, specs, lfun)
 }
 \arguments{
 \item{train}{train set from the training set;}
@@ -15,12 +15,15 @@ intraining_estimations(train, test, form, specs)
 
 \item{specs}{object of class \code{\link{model_specs-class}}. Contains
 the specifications of the base models.}
+
+\item{lfun}{loss function for metalearning. Defaults to ae -- absolute error.}
 }
 \value{
 A list containing two objects:
 \describe{
 \item{mloss}{loss of base models in \strong{test}}
 \item{oob}{out-of-bag test samples}
+\item{Y_hat}{predictions by base models}
 }
 }
 \description{

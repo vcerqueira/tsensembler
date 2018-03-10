@@ -22,6 +22,6 @@ FUN are \strong{rbind}ed;}
 Prequential Procedure in Blocks
 }
 \seealso{
-\code{\link{intraining_estimations}} 
+\code{\link{intraining_estimations}}
 function to use as \strong{FUN} parameter.
 }
