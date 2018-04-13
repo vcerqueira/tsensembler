@@ -8,6 +8,8 @@
 #' @return a list with a correlation matrix
 #' for each prediction point
 #'
+#' @keywords internal
+#'
 #' @export
 sliding_similarity <-
   function(Y_hat_ext, lambda) {
@@ -46,6 +48,8 @@ sliding_similarity <-
 #' \code{\link{sliding_similarity}}
 #'
 #' @param W weights before re-weighting
+#'
+#' @keywords internal
 #'
 #' @export
 sequential_reweighting <-

@@ -32,3 +32,4 @@ A pipeline for retrieving out-of-bag loss estimations
 \seealso{
 Other out-of-bag functions: \code{\link{intraining_predictions}}
 }
+\keyword{internal}

@@ -39,3 +39,4 @@ Other base learning models: \code{\link{bm_cubist}},
   \code{\link{bm_mars}}, \code{\link{bm_ppr}},
   \code{\link{bm_randomforest}}, \code{\link{bm_svr}}
 }
+\keyword{internal}

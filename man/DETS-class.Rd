@@ -93,3 +93,4 @@ the base models of an \strong{DETS} ensemble (and respective
 weights); and \code{\link{dets_hat-class}} for the object that results from
 predicting with an \strong{DETS} model.
 }
+\keyword{internal}

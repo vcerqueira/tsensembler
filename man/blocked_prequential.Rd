@@ -25,3 +25,4 @@ Prequential Procedure in Blocks
 \code{\link{intraining_estimations}}
 function to use as \strong{FUN} parameter.
 }
+\keyword{internal}

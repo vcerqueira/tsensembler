@@ -14,3 +14,4 @@ meta_lasso_predict(meta_model, newdata)
 \description{
 Arbiter predictions via linear model
 }
+\keyword{internal}

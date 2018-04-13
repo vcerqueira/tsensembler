@@ -51,7 +51,9 @@ embed_timeseries <- function(timeseries, embedding.dimension) {
 #' @param x data
 #' 
 #' @import softImpute
-#' 
+#'
+#' @keywords internal
+#'  
 #' @export
 soft.completion <- function(x) {
   if ("data.frame" %in% class(x)) x <- as.matrix(x)

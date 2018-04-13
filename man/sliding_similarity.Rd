@@ -19,3 +19,4 @@ for each prediction point
 \description{
 Sliding similarity via Pearson's correlation
 }
+\keyword{internal}

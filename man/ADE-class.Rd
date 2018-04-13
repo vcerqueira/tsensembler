@@ -71,7 +71,7 @@ correlation among experts in a recent window of observations.}
 
 \item{\code{recent_series}}{the most recent \code{lambda} observations.}
 
-\item{\code{out_of_bag}}{oob}
+\item{\code{out_of_bag}}{Out of bag observations used to train arbiters.}
 }}
 
 \examples{
@@ -90,7 +90,6 @@ train <- embed_timeseries(water_consumption, 5)
 train <- train[1:300, ] # toy size for checks
 
 model <- ADE(target ~., train, specs)
-
 
 }
 \references{
@@ -119,3 +118,4 @@ predicting with an \strong{ADE} model; and \code{\link{update_ade}} to update an
 model, combining functions \strong{update_base_models}, \strong{update_meta_ade}, and
 \strong{update_weights}.
 }
+\keyword{internal}

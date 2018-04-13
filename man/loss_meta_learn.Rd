@@ -17,3 +17,4 @@ a "lasso", or a "gaussianprocess".}
 \description{
 Training an arbiter
 }
+\keyword{internal}

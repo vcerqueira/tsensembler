@@ -12,3 +12,4 @@ soft.completion(x)
 \description{
 Soft Imputation
 }
+\keyword{internal}

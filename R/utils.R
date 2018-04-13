@@ -27,6 +27,8 @@
 #'   erfc(c(.1, .7))
 #' }
 #'
+#' @keywords internal
+#'
 #' @export
 erfc <- function(x, alpha = 2) {
 	stopifnot(is.numeric(x), is.numeric(alpha))
@@ -43,6 +45,8 @@ erfc <- function(x, alpha = 2) {
 #'
 #' @param form formula
 #'
+#' @keywords internal
+#'
 #' @export
 get_y <-
   function(data, form)
@@ -54,6 +58,8 @@ get_y <-
 #' @param x a numeric data.frame;
 #' @param lambda periods to average over when computing the
 #' moving average.
+#'
+#' @keywords internal
 #'
 #' @export
 roll_mean_matrix <-
@@ -429,3 +435,23 @@ subset_corr_matrix <-
 
 get_embedcols <-
   function(x) grepl("^Tm[0-9]?[0-9]$", colnames(x))
+
+rleid <-
+  function(x) {
+    x <- rle(x)$lengths
+    rep(seq_along(x), times = x)
+  }
+
+rm.duplicated <-
+  function(clist) {
+    clist <-
+      Map(function(x) paste0(x,collapse = "_"), clist)
+
+    clist <- as.list(unique(unlist(clist)))
+
+    Map(function(x) as.numeric(split_by_(x)), clist)
+  }
+
+rm.len0 <-
+  function(l) l[!vlapply(l, function(o) length(o) == 0)]
+

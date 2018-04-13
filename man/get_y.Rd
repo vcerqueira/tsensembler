@@ -15,3 +15,4 @@ get_y(data, form)
 Given a formula and a data set, \code{get_y} function retrieves
 the response values.
 }
+\keyword{internal}

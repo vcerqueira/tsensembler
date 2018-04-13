@@ -24,6 +24,8 @@
 #'
 #' @return A list containing Gaussian Processes models
 #'
+#' @keywords internal
+#'
 #' @export
 bm_gaussianprocess <-
   function(form, data, lpars) {
@@ -89,6 +91,7 @@ bm_gaussianprocess <-
 #' \code{\link{bm_ffnn}}; \code{\link{bm_svr}}
 #'
 #' @importFrom stats ppr
+#' @keywords internal
 #'
 #' @export
 bm_ppr <-
@@ -153,6 +156,7 @@ bm_ppr <-
 #' \code{\link{bm_ffnn}}; \code{\link{bm_svr}}
 #'
 #' @import glmnet
+#' @keywords internal
 #'
 #' @export
 bm_glm <-
@@ -228,6 +232,7 @@ bm_glm <-
 #' @inheritParams bm_gaussianprocess
 #'
 #' @import gbm
+#' @keywords internal
 #'
 #' @export
 bm_gbm <-
@@ -248,7 +253,7 @@ bm_gbm <-
     nmodels <-
       length(gbm_p$interaction.depth) *
       length(gbm_p$shrinkage) *
-      length(gbm_p$n.trees) * 
+      length(gbm_p$n.trees) *
       length(gbm_p$dist)
 
     j <- 0
@@ -312,6 +317,7 @@ bm_gbm <-
 #' @inheritParams bm_gaussianprocess
 #'
 #' @import ranger
+#' @keywords internal
 #'
 #' @export
 bm_randomforest <-
@@ -387,6 +393,7 @@ bm_randomforest <-
 #' \code{\link{bm_ffnn}}; \code{\link{bm_svr}}
 #'
 #' @importFrom Cubist cubist
+#' @keywords internal
 #'
 #' @export
 bm_cubist <-
@@ -460,6 +467,7 @@ bm_cubist <-
 #' \code{\link{bm_ffnn}}; \code{\link{bm_svr}}
 #'
 #' @importFrom earth earth
+#' @keywords internal
 #'
 #' @export
 bm_mars <-
@@ -536,6 +544,7 @@ bm_mars <-
 #' \code{\link{bm_ffnn}}; \code{\link{bm_gaussianprocess}}
 #'
 #' @import kernlab
+#' @keywords internal
 #'
 #' @export
 bm_svr <-
@@ -619,6 +628,7 @@ bm_svr <-
 #' \code{\link{bm_gaussianprocess}}; \code{\link{bm_svr}}
 #'
 #' @import nnet
+#' @keywords internal
 #'
 #' @export
 bm_ffnn <-
@@ -707,6 +717,8 @@ bm_ffnn <-
 #' \code{\link{bm_randomforest}}; \code{\link{bm_gaussianprocess}};
 #' \code{\link{bm_ffnn}}; \code{\link{bm_svr}}
 #'
+#' @keywords internal
+#'
 #' @export
 bm_pls_pcr <-
   function(form, data, lpars) {
@@ -786,136 +798,14 @@ best_mvr <-
     which.min(err_by_comp)
   }
 
-
-#' pre dsss
+#' predict method for pls/pcr
 #'
-#' @param model model
-#' @param newdata dn
+#' @param model pls/pcr model
+#' @param newdata new data
 #'
-#' @export
+#' @keywords internal
 predict_pls_pcr <-
   function(model, newdata) {
     bcomp <- model$best_comp_train
     as.data.frame(predict(model, newdata))[,bcomp]
-  }
-
-
-#' sadadadadasdadas
-#' @param model model
-#' @param newdata dn
-#'
-#' @import forecast
-#' @export
-arima_offline_forecast <-
-  function(model, newdata) {
-    form <- model$form
-    train <- model$trainset
-    xreg_cols <- model$cols_xrg
-    model$cols_xrg <- NULL
-
-    Y_tr <- get_y(train, form)
-    Y_ts <- get_y(newdata, form)
-    Y <- c(Y_tr, Y_ts)
-
-    N <- nrow(train)
-
-    all_data <- rbind.data.frame(train, newdata)
-
-    if (length(xreg_cols) > 0) {
-      xregm <- as.matrix(all_data[, xreg_cols])
-      colnames(xregm) <- colnames(newdata)[xreg_cols]
-    } else {
-      xregm <- NULL
-    }
-
-    arima_m <-
-      Arima(y = Y,
-            xreg = xregm,
-            model = model)
-
-    arima_hat <- stats::fitted(arima_m)[-seq_len(N)]
-
-    arima_hat
-  }
-
-#' sadasasadd
-#'
-#' @param model model
-#' @param newdata nd
-#'
-#'
-#' @import forecast
-#' @export
-arima_online_forecast <-
-  function(model, newdata) {
-    form <- model$form
-    train <- model$trainset
-    xreg_cols <- model$cols_xrg
-    model$cols_xrg <- NULL
-
-    Y_tr <- get_y(train, form)
-    Y_ts <- get_y(newdata, form)
-
-    N <- nrow(train)
-
-    all_data <- rbind.data.frame(train, newdata)
-
-    if (length(xreg_cols) > 0) {
-      xregm_c <- as.matrix(all_data[, xreg_cols])
-      colnames(xregm_c) <- colnames(newdata)[xreg_cols]
-    } else {
-      xregm_c <- NULL
-    }
-
-    arima_hat <- numeric(nrow(newdata))
-    for (j in seq_along(arima_hat)) {
-      xregm <- xregm_c[N+j,]
-
-      arima_hat[j] <- forecast::forecast(model, h = 1)$mean
-
-      Y <- c(Y_tr, Y_ts[seq_len(j)])
-
-      model <- auto.arima(y = Y, xreg = xregm_c[seq_len(N+j), ])
-    }
-
-    arima_hat
-  }
-
-
-#' auto arima bm
-#' @param form form
-#' @param data data
-#' @param lpars ls
-#'
-#' @export
-bm_auto_arima <-
-  function(form, data, lpars) {
-    Y <- get_y(data, form)
-
-    tgt_col <- colnames(data) %in% get_target(form)
-    xreg_cols <- which(!(get_embedcols(data) | tgt_col))
-
-    if (length(xreg_cols) > 0) {
-      xregm <- as.matrix(data[,xreg_cols])
-      colnames(xregm) <- colnames(data)[xreg_cols]
-    } else
-      xregm <- NULL
-
-    auto_arima <- tryCatch(forecast::auto.arima(y = Y, xreg = xregm), error = function(e) NULL)
-    if (is.null(auto_arima)) {
-      auto_arima <- forecast::Arima(Y, order = c(0,0,0))
-    }
-    auto_arima$trainset <- data
-    auto_arima$form <- form
-    auto_arima$cols_xrg <- xreg_cols
-
-    mcoefs <- auto_arima$arma[c(1,5,2)]
-    mcoefs <- paste0(mcoefs, collapse = "")
-
-    auto_arima <- list(auto_arima)
-
-    #names(auto_arima) <- paste("arima", mcoefs, sep = "_")
-    names(auto_arima) <- "arima_auto"
-
-    auto_arima
   }

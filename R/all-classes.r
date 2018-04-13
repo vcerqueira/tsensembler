@@ -209,6 +209,8 @@ base_ensemble <-
 #'   )
 #' )
 #'
+#' @keywords internal
+#'
 #' @export
 setClass("model_specs",
          slots = c(learner = "character", learner_pars = "OptionalList")
@@ -493,7 +495,7 @@ setMethod("show",
 #'
 #' @slot recent_series the most recent \code{lambda} observations.
 #'
-#' @slot out_of_bag oob
+#' @slot out_of_bag Out of bag observations used to train arbiters.
 #'
 #' @references Cerqueira, Vitor; Torgo, Luis; Pinto, Fabio;
 #' and Soares, Carlos. "Arbitrated Ensemble for Time Series
@@ -536,6 +538,7 @@ setMethod("show",
 #'
 #' model <- ADE(target ~., train, specs)
 #'
+#' @keywords internal
 #'
 #' @export
 setClass("ADE",
@@ -743,6 +746,8 @@ setClass("ADE",
 #'
 #' @family ensemble predictions
 #'
+#' @keywords internal
+#'
 #' @export
 setClass("ade_hat",
          slots = c(y_hat = "numeric",
@@ -777,6 +782,8 @@ setClass("ade_hat",
 #' @family ensemble predictions
 #'
 #' @seealso \code{\link{ADE-class}} for generating an ADE ensemble.
+#'
+#' @keywords internal
 #'
 #' @export
 ade_hat <- function(y_hat, Y_hat, Y_committee, E_hat) {
@@ -875,6 +882,8 @@ ade_hat <- function(y_hat, Y_hat, Y_committee, E_hat) {
 #' train <- embed_timeseries(water_consumption, 5)
 #'
 #' model <- DETS(target ~., train, specs, lambda = 30, omega = .2)
+#'
+#' @keywords internal
 #'
 #' @export
 setClass("DETS",
@@ -1008,6 +1017,8 @@ setClass("DETS",
 #'
 #' @family ensemble predictions
 #'
+#' @keywords internal
+#'
 #' @export
 setClass("dets_hat",
          slots = c(y_hat = "numeric",
@@ -1036,6 +1047,8 @@ setClass("dets_hat",
 #'
 #' @return Set of results from predicting with a \code{DETS}
 #' ensemble
+#'
+#' @keywords internal
 #'
 #' @export
 dets_hat <- function(y_hat, Y_hat, Y_committee, W) {

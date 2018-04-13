@@ -4,6 +4,9 @@
 #' @param newdata new data to predict
 #'
 #' @import ranger
+#'
+#' @keywords internal
+#'
 #' @export
 meta_rf_predict <-
   function(meta_model, newdata) {
@@ -14,6 +17,8 @@ meta_rf_predict <-
 #'
 #' @param meta_model arbiter -- a glmnet object
 #' @param newdata new data to predict
+#'
+#' @keywords internal
 #'
 #' @export
 meta_lasso_predict <-
@@ -35,6 +40,9 @@ meta_lasso_predict <-
 #' @param data data
 #'
 #' @import ranger
+#'
+#' @keywords internal
+#'
 #' @export
 meta_rf <-
   function(form, data) {
@@ -51,6 +59,9 @@ meta_rf <-
 #' @param data data
 #'
 #' @import glmnet
+#'
+#' @keywords internal
+#'
 #' @export
 meta_lasso <-
   function(form, data) {
@@ -76,6 +87,9 @@ meta_lasso <-
 #' @param meta_model learning algorithm -- either a "randomforest",
 #' a "lasso", or a "gaussianprocess".
 #'
+#' @keywords internal
+#'
+#'
 #' @export
 loss_meta_learn <-
   function(form, data, meta_model) {
@@ -100,6 +114,9 @@ loss_meta_learn <-
 #' @param meta_model learning algorithm -- either a "randomforest",
 #' a "lasso", or a "gaussianprocess".
 #'
+#'
+#' @keywords internal
+#'
 #' @export
 meta_predict <-
   function(model, newdata, meta_model) {
@@ -123,6 +140,9 @@ meta_predict <-
 #' @param data data
 #'
 #' @import kernlab
+#'
+#' @keywords internal
+#'
 #' @export
 meta_gp <-
   function(form, data) {
@@ -140,6 +160,9 @@ meta_gp <-
 #'
 #'
 #' @import kernlab
+#'
+#' @keywords internal
+#'
 #' @export
 meta_gp_predict <-
   function(model, newdata) {

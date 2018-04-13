@@ -15,6 +15,7 @@
 #'
 #' @family out-of-bag functions
 #'
+#' @keywords internal
 #'
 #' @return A list containing two objects:
 #' \describe{
@@ -72,6 +73,8 @@ intraining_predictions <- function(train, test, form, specs) {
 #'
 #' @seealso \code{\link{intraining_estimations}}
 #' function to use as \strong{FUN} parameter.
+#' 
+#' @keywords internal
 #'
 #' @export
 blocked_prequential <- function(x, nfolds, FUN, .rbind = TRUE, ...) {
@@ -91,4 +94,23 @@ blocked_prequential <- function(x, nfolds, FUN, .rbind = TRUE, ...) {
   if (.rbind) cv.res <- rbind_l(cv.res)
 
   cv.res
+}
+
+
+#' Holdout
+#' 
+#' @param x data to split into \code{nfolds} blocks;
+#' @param beta ratio of observations for training
+#' @param FUN function to apply to train/test split
+#' @param ... further arguments to FUN
+#' 
+#' @keywords internal
+#'
+#' @export
+holdout <- function(x, beta, FUN, ...) {
+  len <- NROW(x)
+  train <- x[ seq_len(beta * len), ]
+  test <-  x[-seq_len(beta * len), ]
+
+  FUN(train, test, ...)
 }

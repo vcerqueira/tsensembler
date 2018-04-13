@@ -36,23 +36,8 @@ compute_predictions <-
           mnames[bm],
           "rf"  = predict(M[[bm]], data)$predictions,
           "gbm" = predict(M[[bm]], data, n.trees = 100),
-          #"xgb" = {
-          #  xgb_predict(M[[bm]], data)
-          #},
-          #"prophet" = {
-          #  predict_prophet(M[[bm]], data)
-          #},
           "mvr" = {
             predict_pls_pcr(M[[bm]], data)
-          },
-          #"mvr" = {
-          #  predict(M[[bm]])[, , M[[bm]]$best_comp_train]
-          #},
-          #"ets" = {
-          #  ets_online_forecast(M[[bm]], data)
-          #},
-          "arima" = {
-            arima_offline_forecast(M[[bm]], data)
           },
           "glm" = {
             X_bm <- M[[bm]]$beta@Dimnames[[1]]

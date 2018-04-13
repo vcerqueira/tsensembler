@@ -14,3 +14,4 @@ meta_gp_predict(model, newdata)
 \description{
 Arbiter predictions via linear model
 }
+\keyword{internal}

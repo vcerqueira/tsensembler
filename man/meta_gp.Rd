@@ -14,3 +14,4 @@ meta_gp(form, data)
 \description{
 Training a Gaussian process arbiter
 }
+\keyword{internal}

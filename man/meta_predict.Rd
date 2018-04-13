@@ -17,3 +17,4 @@ a "lasso", or a "gaussianprocess".}
 \description{
 Predicting loss using arbiter
 }
+\keyword{internal}

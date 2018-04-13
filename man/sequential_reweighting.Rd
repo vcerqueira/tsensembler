@@ -19,3 +19,4 @@ This is achieved by taking into account not only predictions
 of performance produced by the arbiters, but also the
 correlation among experts in a recent window of observations.
 }
+\keyword{internal}

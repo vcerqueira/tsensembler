@@ -15,3 +15,4 @@ moving average.}
 \description{
 Computing the rolling mean of the columns of a matrix
 }
+\keyword{internal}

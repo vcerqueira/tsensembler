@@ -37,3 +37,4 @@ Other base learning models: \code{\link{bm_ffnn}},
   \code{\link{bm_pls_pcr}}, \code{\link{bm_ppr}},
   \code{\link{bm_randomforest}}, \code{\link{bm_svr}}
 }
+\keyword{internal}

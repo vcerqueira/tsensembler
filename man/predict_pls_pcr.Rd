@@ -2,15 +2,16 @@
 % Please edit documentation in R/base-models.r
 \name{predict_pls_pcr}
 \alias{predict_pls_pcr}
-\title{pre dsss}
+\title{predict method for pls/pcr}
 \usage{
 predict_pls_pcr(model, newdata)
 }
 \arguments{
-\item{model}{model}
+\item{model}{pls/pcr model}
 
-\item{newdata}{dn}
+\item{newdata}{new data}
 }
 \description{
-pre dsss
+predict method for pls/pcr
 }
+\keyword{internal}
