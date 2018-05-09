@@ -373,7 +373,7 @@ are_pars_valid <-
                c("kernel", "C", "epsilon")
              },
              "bm_glm" = {
-               c("alpha")
+               c("alpha","family")
              },
              "bm_gbm" = {
                c("interaction.depth", "shrinkage", "n.trees","dist")

@@ -164,50 +164,54 @@ bm_glm <-
     if (is.null(lpars$bm_glm))
       lpars$bm_glm <- list()
 
-    if (is.null(lpars$bm_glm$alpha))
+    if (is.null(lpars$bm_glm$alpha)) {
       lpars$bm_glm$alpha <- c(0, 1)
+    }
+
+    if (is.null(lpars$bm_glm$family)) {
+      lpars$bm_glm$family <- "gaussian"
+    }
 
     X <- stats::model.matrix(form, data)
     Y <- get_y(data, form)
 
-    nmodels <- length(lpars$bm_glm$alpha)
+    nmodels <-
+      length(lpars$bm_glm$alpha) *
+      length(lpars$bm_glm$family)
+
 
     j <- 0
     ensemble <- vector("list", nmodels)
     mnames <- character(nmodels)
     for (alpha in lpars$bm_glm$alpha) {
-      j <- j + 1L
+      for (fam in lpars$bm_glm$family) {
+        j <- j + 1L
 
-      if (alpha == 0) {
-        mnames[j] <- "glm_ridge"
-      } else if (alpha == 1) {
-        mnames[j] <- "glm_lasso"
-      } else {
-        mnames[j] <- paste("glm_enet", alpha, sep = "_")
-      }
-      cat(mnames[j],"\n")
-
-      if (!is.null(lpars$rm_ids)) {
-        if (mnames[j] %in% names(lpars$rm_ids)) {
-          cat("ss")
-          rm_ids <- lpars$rm_ids[[mnames[j]]]
-          X <- X[-rm_ids, ]
-          Y <- Y[-rm_ids]
+        if (alpha == 0) {
+          mnames[j] <- "glm_ridge"
+        } else if (alpha == 1) {
+          mnames[j] <- "glm_lasso"
+        } else {
+          mnames[j] <- paste("glm_enet", alpha, sep = "_")
         }
+        cat(mnames[j],"\n")
+
+        mnames[j] <- paste(mnames[j],fam,sep="_")
+
+        m.all <- glmnet(X, Y, alpha = alpha, family = fam)
+        ensemble[[j]] <-
+          glmnet(X,
+                 Y,
+                 alpha = alpha,
+                 lambda = min(m.all$lambda),
+                 family = fam)
       }
-
-      m.all <- glmnet(X, Y, alpha = alpha)
-      ensemble[[j]] <-
-        glmnet(X,
-               Y,
-               alpha = alpha,
-               lambda = min(m.all$lambda))
-
     }
     names(ensemble) <- mnames
 
     ensemble
   }
+
 
 #' Fit Generalized Boosted Regression models
 #'
