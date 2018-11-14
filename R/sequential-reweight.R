@@ -77,6 +77,10 @@ sequential_reweighting <-
 
 weight_redist <-
   function(ssimilarity, W) {
+    if (is.na(ssimilarity)) {
+      warning("na similarity, returning original w")
+      return(W)
+    }
     W_final <- rep(NA_real_, times = length(W))
     names(W_final) <- names(W)
     W_final[1] <- W[1]

@@ -24,7 +24,7 @@
 #'
 #' @export
 "train_ade" <-
-  function(form, train, specs, lambda, lfun) {
+  function(form, train, specs, lambda, lfun, meta_model_type) {
     tgt <- get_target(form)
 
     cat("Setting up meta data\n")
@@ -60,7 +60,7 @@
               if (any(is.na(meta_set))) {
                 meta_set <- soft.completion(meta_set)
               }
-               loss_meta_learn(score ~ ., meta_set, "randomforest")
+               loss_meta_learn(score ~ ., meta_set, meta_model_type)
              })
 
     list(

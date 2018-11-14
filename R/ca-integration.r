@@ -203,7 +203,7 @@ OOB_Chat <-
                   trans = "linear")
 
     OOB_C_hat <-
-      merging_in_experts(C = object@committee_set,
+      merging_in_experts(C = object@committee_set$C,
                          Y_hat = OOB_Y_hat,
                          W = OOB_W,
                          FUN = object@aggregate_subsets)

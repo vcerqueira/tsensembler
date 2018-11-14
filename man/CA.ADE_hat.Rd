@@ -4,7 +4,7 @@
 \alias{CA.ADE_hat}
 \title{CA generaliser using arbitrage}
 \usage{
-CA.ADE_hat(obj, predict_info, newdata)
+CA.ADE_hat(obj, predict_info, newdata, lambda = 1, omega = 0.5)
 }
 \arguments{
 \item{obj}{a \code{\link{constructive_aggregation-class}}

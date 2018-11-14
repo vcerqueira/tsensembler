@@ -4,7 +4,7 @@
 \alias{train_ade}
 \title{Training procedure of for ADE}
 \usage{
-train_ade(form, train, specs, lambda, lfun)
+train_ade(form, train, specs, lambda, lfun, meta_model_type)
 }
 \arguments{
 \item{form}{formula;}

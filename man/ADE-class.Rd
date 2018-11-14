@@ -72,6 +72,8 @@ correlation among experts in a recent window of observations.}
 \item{\code{recent_series}}{the most recent \code{lambda} observations.}
 
 \item{\code{out_of_bag}}{Out of bag observations used to train arbiters.}
+
+\item{\code{meta_model_type}}{meta model to use -- defaults to random forest}
 }}
 
 \examples{

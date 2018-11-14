@@ -59,7 +59,7 @@ setMethod("predict",
             E_hat <-
               lapply(object@meta_model,
                      function(o) {
-                       meta_predict(o, newdata, "randomforest")
+                       meta_predict(o, newdata, object@meta_model_type)
                      })
             names(E_hat) <- colnames(Y_hat)
 

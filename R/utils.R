@@ -179,7 +179,11 @@ normalize <-
       stop("x must be numeric.")
     if (length(x) == 1L)
       return(1.)
-    if (stats::var(x, na.rm = T) == 0)
+      
+    var_x <- stats::var(x, na.rm = T)
+    if (is.na(var_x)) var_x <- 0
+    
+    if (var_x == 0)
       return(x)
 
     (x - min(x, ...)) / (max(x, ...) - min(x, ...))
@@ -210,7 +214,11 @@ proportion <-
       x <- unlist(x)
     if (length(x) == 1L)
       return(1)
-    if (stats::var(x, na.rm = T) == 0)
+      
+    var_x <- stats::var(x, na.rm = T)
+    if (is.na(var_x)) var_x <- 0
+    
+    if (var_x == 0)
       return(rep(1 / length(x), times = length(x)))
 
     x / sum(x, na.rm = T)
@@ -389,6 +397,9 @@ are_pars_valid <-
              },
              "bm_mars" = {
                c("nk", "thresh", "degree")
+             },
+             "bm_timeseries" = {
+               c("model")
              },
              "bm_gaussianprocess" = {
                c("kernel", "tol")

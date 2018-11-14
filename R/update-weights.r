@@ -78,6 +78,29 @@ setMethod("update_weights",
             object
           })
 
+# #' upda lade
+# #' @export
+# setMethod("update_weights",
+#           signature("lADE"),
+#           function(object, newdata) {
+#             rseries <- object@recent_series
+# 
+#             if (!all(colnames(object@recent_series) == colnames(newdata)))
+#               stop(
+#                 "The dimension of the new data must have the
+#                 same structure as the \"object@recent_series\" (colnames)",
+#                 call. = FALSE
+#               )
+# 
+#             rseries <- rbind.data.frame(rseries, newdata)
+# 
+#             rseries <- recent_lambda_observations(rseries, object@lambda)
+# 
+#             object@recent_series <- rseries
+# 
+#             object
+#           })
+
 #' @rdname update_weights
 setMethod("update_weights",
           signature("DETS"),

@@ -15,8 +15,7 @@ ae(y, y_hat, ...)
 Element-wise computation of the absolute error loss function.
 }
 \seealso{
-Other error/performance functions: \code{\link{mae}},
-  \code{\link{mase}}, \code{\link{mse}},
-  \code{\link{r_squared}}, \code{\link{se}}
+Other error/performance functions: \code{\link{mse}},
+  \code{\link{se}}
 }
 \keyword{internal}

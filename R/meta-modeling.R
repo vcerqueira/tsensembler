@@ -65,7 +65,7 @@ meta_rf <-
 #' @export
 meta_lasso <-
   function(form, data) {
-    alpha <- 1 
+    alpha <- 1
 
     X <- stats::model.matrix(form, data)
     Y <- get_y(data, form)
@@ -97,6 +97,9 @@ loss_meta_learn <-
            "randomforest" = {
              meta_rf(form, data)
            },
+           "cubist" = {
+             meta_cubist(form, data)
+           },
            "lasso" = {
              meta_lasso(form, data)
            },
@@ -108,7 +111,7 @@ loss_meta_learn <-
   }
 
 #' Predicting loss using arbiter
-#' 
+#'
 #' @param model arbiter model
 #' @param newdata new data to predict loss
 #' @param meta_model learning algorithm -- either a "randomforest",
@@ -123,6 +126,9 @@ meta_predict <-
     switch(meta_model,
            "randomforest" = {
              meta_rf_predict(model, newdata)
+           },
+           "cubist" = {
+             meta_cubist_predict(model, newdata)
            },
            "lasso" = {
              meta_lasso_predict(model, newdata)
@@ -154,7 +160,7 @@ meta_gp <-
   }
 
 #' Arbiter predictions via linear model
-#' 
+#'
 #' @param model arbiter -- a Gaussian process model
 #' @param newdata new data to predict loss
 #'
@@ -167,4 +173,50 @@ meta_gp <-
 meta_gp_predict <-
   function(model, newdata) {
     predict(model, newdata)[,1]
+  }
+
+
+#' Training a RBR arbiter
+#'
+#' @param form formula
+#' @param data data
+#'
+#' @import Cubist
+#'
+#' @keywords internal
+#'
+#' @export
+meta_cubist <-
+  function(form, data) {
+    tr_X <- stats::model.matrix(form, data)
+    tr_Y <- get_y(data, form)
+
+    model <- suppressWarnings(Cubist::cubist(tr_X,tr_Y, committees = 50))
+    model$form <- form
+
+    model
+  }
+
+#' Arbiter predictions via Cubist
+#'
+#' @param meta_model arbiter -- a ranger object
+#' @param newdata new data to predict
+#'
+#' @import Cubist
+#'
+#' @keywords internal
+#'
+#' @export
+meta_cubist_predict <-
+  function(meta_model, newdata) {
+
+    vars <- meta_model$vars$all
+    ids <- which(!colnames(newdata) %in% vars)
+
+    newdata <- subset(newdata, select = -ids)
+    newdata$score <- -1
+
+    ts_X <- stats::model.matrix(meta_model$form, newdata)
+
+    predict(meta_model, ts_X)
   }

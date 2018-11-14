@@ -8,7 +8,7 @@
 #'
 #' @keywords internal
 CA.ADE_hat <-
-  function(obj, predict_info, newdata) {
+  function(obj, predict_info, newdata, lambda=1, omega=.5) {
     C_hat_OOB <- OOB_Chat(obj)
     Y_OOB <- get_y(obj@out_of_bag$oob, obj@form)
     OOB <- obj@out_of_bag$oob
@@ -46,7 +46,7 @@ CA.ADE_hat <-
 
     W <- t(apply(E_hat, 1, model_weighting, "linear"))
 
-    C <- build_committee(predict_info$C_hat, Y, 50, .5)
+    C <- build_committee(predict_info$C_hat, Y, lambda, omega)
 
     combine_predictions(predict_info$C_hat, W, C)
   }

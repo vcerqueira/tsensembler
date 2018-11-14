@@ -5,7 +5,8 @@
 \title{Arbitrated Dynamic Ensemble}
 \usage{
 ADE(form, data, specs, lambda = 50, omega = 0.5, select_best = FALSE,
-  all_models = FALSE, aggregation = "linear", sequential_reweight = FALSE)
+  all_models = FALSE, aggregation = "linear", sequential_reweight = FALSE,
+  meta_loss_fun = ae, meta_model_type = "randomforest")
 }
 \arguments{
 \item{form}{formula;}
@@ -51,6 +52,10 @@ explicitly during the aggregation of the output of experts.
 This is achieved by taking into account not only predictions
 of performance produced by the arbiters, but also the
 correlation among experts in a recent window of observations.}
+
+\item{meta_loss_fun}{Besides}
+
+\item{meta_model_type}{meta model to use -- defaults to random forest}
 }
 \description{
 Arbitrated Dynamic Ensemble (ADE) is an ensemble approach
