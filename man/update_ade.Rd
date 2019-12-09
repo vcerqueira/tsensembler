@@ -6,9 +6,9 @@
 \alias{update_ade,ADE-method}
 \title{Updating an ADE model}
 \usage{
-update_ade(object, newdata)
+update_ade(object, newdata, num_cores = 1)
 
-\S4method{update_ade}{ADE}(object, newdata)
+\S4method{update_ade}{ADE}(object, newdata, num_cores = 1)
 }
 \arguments{
 \item{object}{a \code{\link{ADE-class}} object.}
@@ -17,6 +17,11 @@ update_ade(object, newdata)
 the data used to initially train the models (training set), together
 with new observations (for example, validation set). Each model
 is retrained using \code{newdata}.}
+
+\item{num_cores}{A numeric value to specify the number of cores used to
+train base and meta models. num_cores = 1
+leads to sequential training of models. num_cores > 1
+splits the training of the base models across num_cores cores.}
 }
 \description{
 \strong{update_ade} is a generic function that combines
@@ -55,3 +60,4 @@ updating the meta-models of an ADE model.
 Other updating models: \code{\link{update_ade_meta}},
   \code{\link{update_weights}}
 }
+\concept{updating models}

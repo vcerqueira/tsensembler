@@ -367,7 +367,9 @@ model_specs <-
         "bm_prophet",
         "bm_ets",
         "bm_timeseries",
-        "bm_xgb"
+        "bm_xgb",
+        "bm_deepffnn",
+        "bm_lstm"
         )
 
     if (!all(learner %in% .available_models))
@@ -621,6 +623,11 @@ setClass("ADE",
 #'
 #' @param meta_model_type meta model to use -- defaults to random forest
 #'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
 #' @references Cerqueira, Vitor; Torgo, Luis; Pinto, Fabio;
 #' and Soares, Carlos. "Arbitrated Ensemble for Time Series
 #' Forecasting" to appear at: Joint European Conference on Machine Learning and
@@ -674,7 +681,8 @@ setClass("ADE",
            aggregation = "linear",
            sequential_reweight = FALSE,
            meta_loss_fun = ae,
-           meta_model_type = "randomforest") {
+           meta_model_type = "randomforest",
+           num_cores = 1) {
 
     if (select_best && is.numeric(omega))
       warning(
@@ -710,7 +718,8 @@ setClass("ADE",
         specs = specs,
         lambda = lambda,
         lfun = meta_loss_fun,
-        meta_model_type = meta_model_type)
+        meta_model_type = meta_model_type,
+        num_cores = num_cores)
 
     methods::new(
       "ADE",
@@ -886,11 +895,11 @@ ade_hat <- function(y_hat, Y_hat, Y_committee, E_hat) {
 #' specs <- model_specs(
 #'  c("bm_ppr", "bm_svr"),
 #'  list(bm_ppr = list(nterms = c(2, 4)),
-#'       bm_svr = list(kernel = c("vanilladot", "polydot"), C = c(1,5)))
+#'       bm_svr = list(kernel = c("vanilladot"), C = c(1,5)))
 #' )
 #'
 #' data("water_consumption")
-#' train <- embed_timeseries(water_consumption, 5)
+#' train <- embed_timeseries(water_consumption, 5)[1:500,]
 #'
 #' model <- DETS(target ~., train, specs, lambda = 30, omega = .2)
 #'
@@ -958,6 +967,11 @@ setClass("DETS",
 #' model is the one that has the lowest loss prediction from
 #' the meta models. Defaults to FALSE;
 #'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
 #' @references Cerqueira, Vitor; Torgo, Luis; Oliveira, Mariana,
 #' and Bernhard Pfahringer. "Dynamic and Heterogeneous Ensembles
 #' for Time Series Forecasting." Data Science and Advanced
@@ -993,9 +1007,10 @@ setClass("DETS",
            specs,
            lambda = 50,
            omega = .5,
-           select_best = FALSE) {
+           select_best = FALSE,
+           num_cores=1) {
 
-    M <- build_base_ensemble(form, data, specs)
+    M <- build_base_ensemble(form, data, specs, num_cores)
 
     recent_lambda_k <- recent_lambda_observations(data, lambda)
 

@@ -8,6 +8,8 @@
 #' @param data data.frame for training the predictive models;
 #' @param specs object of class \code{\link{model_specs-class}}. Contains the information
 #' about the parameter setting of the models to train.
+#' @param num_cores number of cores
+#'
 #'
 #' @return An S4 class with the following slots:
 #' \strong{base_models}, a list containing the trained models;
@@ -20,12 +22,12 @@
 #' data("water_consumption")
 #' dataset <- embed_timeseries(water_consumption, 5)
 #' specs <- model_specs(c("bm_ppr","bm_svr"), NULL)
-#' M <- build_base_ensemble(target ~., dataset, specs)
+#' M <- build_base_ensemble(target ~., dataset, specs, 1)
 #'
 #' @export
 build_base_ensemble <-
-  function(form, data, specs) {
-    M <- learning_base_models(data, form, specs)
+  function(form, data, specs, num_cores=1) {
+    M <- learning_base_models(data, form, specs, num_cores=num_cores)
 
     base_ensemble(base_models = M$base_model,
                   pre_weights =  M$preweights,
@@ -41,6 +43,10 @@ build_base_ensemble <-
 #' @param train training set to build the predictive models;
 #' @param form formula;
 #' @param specs object of class \code{\link{model_specs-class}}
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
 #'
 #' @seealso \code{\link{build_base_ensemble}}.
 #'
@@ -48,29 +54,58 @@ build_base_ensemble <-
 #' data("water_consumption")
 #' dataset <- embed_timeseries(water_consumption, 5)
 #' specs <- model_specs(c("bm_ppr","bm_svr"), NULL)
-#' M <- build_base_ensemble(target ~., dataset, specs)
+#' M <- build_base_ensemble(target ~., dataset, specs, 1)
 #'
 #' @return A series of predictive models (\code{base_model}), and
 #' the weights of the models computed in the training
 #' data (\code{preweights}).
 learning_base_models <-
-  function(train, form, specs) {
+  function(train, form, specs, num_cores) {
+    if (length(num_cores) > 1 || !is.numeric(num_cores)) {
+      stop("Please specify a numeric value for num_cores. num_cores = 1
+           leads to sequential training of models. num_cores > 1
+           splits the training of the base models across num_cores cores.")
+    }
+
+    if (is.null(num_cores)) num_cores <- 1
+
     Y_tr <- get_y(train, form)
 
     learner <- specs@learner
     lpars <- specs@learner_pars
 
-    base_model <- vector("list", length(learner))
-    pre_weights <- vector("list", length(learner))
-
     cat("\nTraining the base models...\n")
-    for (o in seq_along(learner)) {
-      cat("Base model:", learner[o],"\n")
-      utils::capture.output(base_model[[o]] <-
-                              do.call(learner[o], c(list(form, train, lpars))))
-      pre_weights[[o]] <-
-        compute_predictions(base_model[[o]], form, train)
+    if (num_cores > 1) {
+      cl <- parallel::makeCluster(num_cores)
+      doParallel::registerDoParallel(cl)
+      `%partrain%` <- `%dopar%`
+    } else {
+      `%partrain%` <- `%do%`
     }
+
+    o <- NULL
+    base_model <-
+      foreach::foreach(o = seq_along(learner),
+                       .packages = "tsensembler") %partrain% {
+                         cat("\n\n",learner[o],"\n")
+
+                         do.call(learner[o], c(list(form, train, lpars)))
+                       }
+
+    # learner <- learner[-3]
+    # base_model <-
+    #   lapply(seq_along(learner), function(o) {
+    #     cat("\n\n",learner[o],"\n")
+    #
+    #     do.call(learner[o], c(list(form, train, lpars)))
+    #   })
+
+
+    pre_weights <-
+      lapply(base_model,
+           function(o) {
+             compute_predictions(o, form, train)
+           })
 
     base_model <- unlist(base_model, recursive = FALSE)
     pre_weights  <- unlist(pre_weights, recursive = FALSE)

@@ -4,7 +4,8 @@
 \alias{DETS}
 \title{Dynamic Ensemble for Time Series}
 \usage{
-DETS(form, data, specs, lambda = 50, omega = 0.5, select_best = FALSE)
+DETS(form, data, specs, lambda = 50, omega = 0.5,
+  select_best = FALSE, num_cores = 1)
 }
 \arguments{
 \item{form}{formula;}
@@ -31,6 +32,11 @@ Defaults to .5 according to empirical experiments;}
 a single base model is picked to make a prediction. The picked
 model is the one that has the lowest loss prediction from
 the meta models. Defaults to FALSE;}
+
+\item{num_cores}{A numeric value to specify the number of cores used to
+train base and meta models. num_cores = 1
+leads to sequential training of models. num_cores > 1
+splits the training of the base models across num_cores cores.}
 }
 \description{
 A Dynamic Ensemble for Time Series (DETS). The DETS ensemble

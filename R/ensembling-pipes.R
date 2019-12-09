@@ -8,7 +8,7 @@
 #' across the observations
 #'
 #' @family weighting base models
-#' 
+#'
 #' @keywords internal
 #'
 #' @export
@@ -280,19 +280,21 @@ struc_embed <-
 #'
 #' @param lfun loss function to compute. Defaults to \code{ae}, absolute
 #' error
+#' @param y_tr target of training set
+#'
 #' @keywords internal
 #'
 #' @export
 base_models_loss <-
-  function(Y_hat, Y, lfun = se, Y_tr = 1) {
-    
-    alpha <- .3
+  function(Y_hat, Y, lfun = se, y_tr) {
+
+    #alpha <- .3
     #Y_combined <- rowMeans(Y_hat)
 
     models_loss <-
         lapply(Y_hat,
                function(o) {
-                 lfun(Y, o, Y_hat, alpha, Y_tr)
+                 lfun(Y, o, y_tr)
                })
 
     as.data.frame(models_loss)

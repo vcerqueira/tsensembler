@@ -22,4 +22,5 @@ Other weighting base models: \code{\link{EMASE}},
   \code{\link{model_recent_performance}},
   \code{\link{model_weighting}}
 }
+\concept{weighting base models}
 \keyword{internal}

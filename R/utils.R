@@ -179,10 +179,10 @@ normalize <-
       stop("x must be numeric.")
     if (length(x) == 1L)
       return(1.)
-      
+
     var_x <- stats::var(x, na.rm = T)
     if (is.na(var_x)) var_x <- 0
-    
+
     if (var_x == 0)
       return(x)
 
@@ -214,10 +214,10 @@ proportion <-
       x <- unlist(x)
     if (length(x) == 1L)
       return(1)
-      
+
     var_x <- stats::var(x, na.rm = T)
     if (is.na(var_x)) var_x <- 0
-    
+
     if (var_x == 0)
       return(rep(1 / length(x), times = length(x)))
 
@@ -387,7 +387,7 @@ are_pars_valid <-
                c("interaction.depth", "shrinkage", "n.trees","dist")
              },
              "bm_ffnn" = {
-               c("size", "decay", "maxit")
+               c("size", "decay", "maxit","hidden1","hidden2")
              },
              "bm_randomforest" = {
                c("num.trees", "mtry")
@@ -396,7 +396,7 @@ are_pars_valid <-
                c("committees", "neighbors")
              },
              "bm_mars" = {
-               c("nk", "thresh", "degree")
+               c("nk", "thresh", "degree","pmethod")
              },
              "bm_timeseries" = {
                c("model")
@@ -404,8 +404,17 @@ are_pars_valid <-
              "bm_gaussianprocess" = {
                c("kernel", "tol")
              },
+             "bm_deepffnn" = {
+               c("num_epochs", "nunits")
+             },
+             "bm_lstm" = {
+               c("num_epochs", "nunits")
+             },
              "bm_pls_pcr" = {
                c("method")
+             },
+             "bm_xgb" = {
+               c("max_depth","eta","nrounds")
              },
              "bm_ppr" = {
                c("nterms", "sm.method")
@@ -466,3 +475,9 @@ rm.duplicated <-
 rm.len0 <-
   function(l) l[!vlapply(l, function(o) length(o) == 0)]
 
+
+model.matrix.na <-
+  function(fm, x) {
+    stats::model.matrix(fm,
+                 stats::model.frame(fm,x,na.action=function(z) z))
+  }

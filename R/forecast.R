@@ -30,7 +30,9 @@ compute_predictions <-
         split_by_(o)[1])
 
     Y_hat <- list()
+    time_cost <- c()
     for (bm in seq_along(M)) {
+      t0 <- Sys.time()
       Y_hat[[bm]] <-
         switch(
           mnames[bm],
@@ -38,6 +40,10 @@ compute_predictions <-
           "gbm" = predict(M[[bm]], data, n.trees = 100),
           "mvr" = {
             predict_pls_pcr(M[[bm]], data)
+          },
+          "nnet" = {
+            newX <- as.matrix(stats::model.matrix(form, data))
+            monmlp.predict(newX, M[[bm]])[,1]
           },
           "arima" = {
             arima_predict(M[[bm]], data)
@@ -48,6 +54,15 @@ compute_predictions <-
           "tbats" = {
             tbats_predict(M[[bm]], data)
           },
+          "xgb" = {
+            xgb_predict(M[[bm]], data)
+          },
+          #"lstm" = {
+          #  predict_lstm(M[[bm]], data)
+          #},
+          #"deepffnn" = {
+          #  predict_deepffnn(M[[bm]], data)
+          #},
           "glm" = {
             X_bm <- M[[bm]]$beta@Dimnames[[1]]
             data <- data[colnames(data) %in% c(target_var, X_bm)]
@@ -55,10 +70,24 @@ compute_predictions <-
 
             predict.glmnet(M[[bm]], data_bm, type = "response")
           },
+
+          "cub" = {
+            data_bm <- stats::model.matrix(form, data)
+            predict(M[[bm]], data_bm, neighbors=M[[bm]]$neighbors)
+          },
           predict(M[[bm]], data)
         )
+
+      t1 <- Sys.time()
+      dt <- difftime(t1,t0, units="secs")
+      dt <- round(as.vector(dt),5)
+
+      time_cost <- c(time_cost,dt)
     }
     names(Y_hat) <- mnames_raw
+    names(time_cost) <- mnames_raw
+
+    attr(Y_hat, "Times") <- time_cost
 
     Y_hat
   }

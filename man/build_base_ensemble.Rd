@@ -4,7 +4,7 @@
 \alias{build_base_ensemble}
 \title{Wrapper for creating an ensemble}
 \usage{
-build_base_ensemble(form, data, specs)
+build_base_ensemble(form, data, specs, num_cores = 1)
 }
 \arguments{
 \item{form}{formula;}
@@ -13,6 +13,8 @@ build_base_ensemble(form, data, specs)
 
 \item{specs}{object of class \code{\link{model_specs-class}}. Contains the information
 about the parameter setting of the models to train.}
+
+\item{num_cores}{number of cores}
 }
 \value{
 An S4 class with the following slots:
@@ -31,6 +33,6 @@ a set of regression models.
 data("water_consumption")
 dataset <- embed_timeseries(water_consumption, 5)
 specs <- model_specs(c("bm_ppr","bm_svr"), NULL)
-M <- build_base_ensemble(target ~., dataset, specs)
+M <- build_base_ensemble(target ~., dataset, specs, 1)
 
 }

@@ -23,4 +23,5 @@ from the base models
 \seealso{
 Other out-of-bag functions: \code{\link{intraining_estimations}}
 }
+\concept{out-of-bag functions}
 \keyword{internal}

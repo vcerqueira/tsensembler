@@ -14,4 +14,5 @@ rmse(y, y_hat)
 \description{
 Utility function to compute Root Mean Squared Error (RMSE)
 }
+\concept{error functions}
 \keyword{internal}

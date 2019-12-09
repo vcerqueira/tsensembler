@@ -17,4 +17,3 @@ class object, from \code{\link{committee_set-class}} and
 \code{\link{base_ensemble-class}}. It assumes that
 \code{\link{model_specs-class}} are consistent.
 }
-\keyword{internal}

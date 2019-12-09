@@ -18,4 +18,5 @@ Utility function to compute mean squared error (MSE)
 Other error/performance functions: \code{\link{ae}},
   \code{\link{se}}
 }
+\concept{error/performance functions}
 \keyword{internal}

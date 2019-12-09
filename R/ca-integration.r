@@ -108,7 +108,7 @@ merging_in_experts <-
 
 #' Merge across sub-ensembles
 #'
-#' @param predict_info data from ...
+#' @param predict_info output of \strong{hat_info} function
 #' @param FUN function used to combine the models in each
 #' subset.
 #' @param object constructive aggregation class object

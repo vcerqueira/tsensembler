@@ -31,4 +31,5 @@ Predictions by an DETS ensemble
 Other ensemble predictions: \code{\link{ade_hat-class}},
   \code{\link{ade_hat}}, \code{\link{dets_hat-class}}
 }
+\concept{ensemble predictions}
 \keyword{internal}

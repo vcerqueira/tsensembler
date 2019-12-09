@@ -18,4 +18,5 @@ Element-wise computation of the absolute error loss function.
 Other error/performance functions: \code{\link{mse}},
   \code{\link{se}}
 }
+\concept{error/performance functions}
 \keyword{internal}

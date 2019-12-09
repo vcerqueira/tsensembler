@@ -216,11 +216,74 @@ setMethod("predict",
                                            newdata)
                      })
 
+            Times <- sapply(Y_hat, attr, "Times")
+
             Y_hat <- unlist(Y_hat, recursive = FALSE)
             nmodels <- names(Y_hat)
 
             Y_hat <- as.data.frame(Y_hat)
             colnames(Y_hat) <- nmodels
 
+            attr(Y_hat, "Times") <- Times
+
             Y_hat
           })
+
+#' multi step prediction s
+#'
+#' @param object sasds
+#' @param newdata nds
+#' @param h horizons
+#'
+#' @export
+setGeneric("multi_step_predict",
+           function(object, newdata, h) {
+             standardGeneric("multi_step_predict")
+           })
+
+
+#' multi step prediction
+#'
+#' @param object sasd
+#' @param newdata nd
+#' @param h horizon
+#'
+#' @export
+setMethod("multi_step_predict",
+          signature("base_ensemble"),
+          function(object, newdata, h) {
+
+            Y_hat <- vector("list", object@N)
+            for (j in 1:object@N) {
+              cat(names(object@base_models[j]),"\n")
+              nd <- newdata
+              nd$target <- -1.
+              Yhatm <- matrix(NA_real_, nrow = nrow(nd), ncol = h)
+              for (i in 1:h) {
+
+                yhat_i <- compute_predictions(object@base_models[j],
+                                              object@form,
+                                              nd)
+
+                if (is.matrix(yhat_i[[1]])) {
+                  yh <- yhat_i[[1]][,1]
+                } else {
+                  yh <- yhat_i[[1]]
+                }
+
+                nd[,3:ncol(nd)] <- nd[,2:(ncol(nd)-1)]
+
+                Yhatm[,i] <- nd$Tm1 <- yh
+              }
+              colnames(Yhatm) <- paste0("t+", 1:h)
+              Yhatm <- as.data.frame(Yhatm)
+
+              Y_hat[[j]] <- Yhatm
+            }
+
+            names(Y_hat) <- names(object@base_models)
+
+            Y_hat
+          })
+
+

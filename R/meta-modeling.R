@@ -50,7 +50,8 @@ meta_rf <-
            data,
            mtry = NCOL(data) / 3,
            num.trees = 500,
-           write.forest = TRUE)
+           write.forest = TRUE,
+           keep.inbag = TRUE)
   }
 
 #' Training a LASSO arbiter

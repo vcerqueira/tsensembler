@@ -7,11 +7,11 @@
 \alias{update_base_models,DETS-method}
 \title{Update the base models of an ensemble}
 \usage{
-update_base_models(object, newdata)
+update_base_models(object, newdata, num_cores = 1)
 
-\S4method{update_base_models}{ADE}(object, newdata)
+\S4method{update_base_models}{ADE}(object, newdata, num_cores = 1)
 
-\S4method{update_base_models}{DETS}(object, newdata)
+\S4method{update_base_models}{DETS}(object, newdata, num_cores = 1)
 }
 \arguments{
 \item{object}{an ensemble object, of class \code{\link{DETS-class}} or
@@ -20,6 +20,11 @@ update_base_models(object, newdata)
 \item{newdata}{new data used to update the models. Each base model
 is retrained, so \code{newdata} should be the past data used for initially training
 the models along with any further available observations.}
+
+\item{num_cores}{A numeric value to specify the number of cores used to
+train base and meta models. num_cores = 1
+leads to sequential training of models. num_cores > 1
+splits the training of the base models across num_cores cores.}
 }
 \description{
 This is a generic function for updating the base models

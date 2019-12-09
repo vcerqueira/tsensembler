@@ -130,7 +130,8 @@ build_committee_set <-
         intraining_estimations,
         form = form,
         specs = specs,
-        lfun = ae)
+        lfun = ae,
+        num_cores = 1)
 
     C <-
       prune_c_outperformance(OOB_data$mloss, lambda, depth)
@@ -172,8 +173,6 @@ build_committee_set <-
 #'
 #' @param committee_obj \code{\link{committee_set-class}} object
 #' @param base_ensemble_obj \code{\link{base_ensemble-class}} object
-#'
-#' @keywords internal
 #'
 #'
 #' @export
@@ -226,12 +225,11 @@ constructive_aggregation_ <-
 #'
 #' @examples
 #' specs <- model_specs(
-#'   learner = c("bm_ppr", "bm_svr", "bm_mars"),
+#'   learner = c("bm_svr", "bm_mars"),
 #'   learner_pars = list(
 #'     bm_glm = list(alpha = c(0, .5, 1)),
-#'     bm_svr = list(kernel = c("rbfdot", "polydot"),
-#'                   C = c(1, 3)),
-#'     bm_ppr = list(nterms = 4)
+#'     bm_svr = list(kernel = c("rbfdot"),
+#'                   C = c(1, 3))
 #'   )
 #' )
 #'
@@ -261,7 +259,8 @@ constructive_aggregation <-
         intraining_estimations,
         form = form,
         specs = specs,
-        lfun = ae)
+        lfun = ae,
+        num_cores=1)
 
     C <- prune_c_outperformance(OOB_data$mloss, lambda, depth)
 
@@ -277,7 +276,7 @@ constructive_aggregation <-
     recent_lambda_k <-
       recent_lambda_observations(data, lambda)
 
-    M <- build_base_ensemble(form, data, specs)
+    M <- build_base_ensemble(form, data, specs, 1)
 
     methods::new(
       "constructive_aggregation",

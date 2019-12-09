@@ -4,7 +4,7 @@
 \alias{learning_base_models}
 \title{Training the base models of an ensemble}
 \usage{
-learning_base_models(train, form, specs)
+learning_base_models(train, form, specs, num_cores)
 }
 \arguments{
 \item{train}{training set to build the predictive models;}
@@ -12,6 +12,11 @@ learning_base_models(train, form, specs)
 \item{form}{formula;}
 
 \item{specs}{object of class \code{\link{model_specs-class}}}
+
+\item{num_cores}{A numeric value to specify the number of cores used to
+train base and meta models. num_cores = 1
+leads to sequential training of models. num_cores > 1
+splits the training of the base models across num_cores cores.}
 }
 \value{
 A series of predictive models (\code{base_model}), and
@@ -26,7 +31,7 @@ of predictive models, according to \emph{specs}
 data("water_consumption")
 dataset <- embed_timeseries(water_consumption, 5)
 specs <- model_specs(c("bm_ppr","bm_svr"), NULL)
-M <- build_base_ensemble(target ~., dataset, specs)
+M <- build_base_ensemble(target ~., dataset, specs, 1)
 
 }
 \seealso{

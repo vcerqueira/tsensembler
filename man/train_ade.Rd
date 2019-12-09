@@ -4,7 +4,7 @@
 \alias{train_ade}
 \title{Training procedure of for ADE}
 \usage{
-train_ade(form, train, specs, lambda, lfun, meta_model_type)
+train_ade(form, train, specs, lambda, lfun, meta_model_type, num_cores)
 }
 \arguments{
 \item{form}{formula;}
@@ -21,7 +21,15 @@ models are selected and weighted at each prediction instance, according
 to their performance in the last \emph{lambda} observations.
 Defaults to 50 according to empirical experiments;}
 
-\item{lfun}{meta loss function}
+\item{lfun}{meta loss function - defaults to \strong{ae} (absolute error)}
+
+\item{meta_model_type}{algorithm used to train meta models. Defaults to a
+random forest (using ranger package)}
+
+\item{num_cores}{A numeric value to specify the number of cores used to
+train base and meta models. num_cores = 1
+leads to sequential training of models. num_cores > 1
+splits the training of the base models across num_cores cores.}
 }
 \description{
 Base level models are trained according to \strong{specs},

@@ -38,3 +38,4 @@ Other weighting base models: \code{\link{EMASE}},
   \code{\link{get_top_models}},
   \code{\link{model_weighting}}, \code{\link{select_best}}
 }
+\concept{weighting base models}

@@ -21,4 +21,5 @@ Utility function to compute pointwise squared error (SE)
 Other error/performance functions: \code{\link{ae}},
   \code{\link{mse}}
 }
+\concept{error/performance functions}
 \keyword{internal}

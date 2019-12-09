@@ -18,13 +18,31 @@
 #' to their performance in the last \emph{lambda} observations.
 #' Defaults to 50 according to empirical experiments;
 #'
-#' @param lfun meta loss function
+#' @param lfun meta loss function - defaults to \strong{ae} (absolute error)
+#'
+#' @param meta_model_type algorithm used to train meta models. Defaults to a
+#' random forest (using ranger package)
+#'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
 #'
 #' @keywords internal
 #'
+#' @import parallel
+#' @import foreach
+#'
 #' @export
 "train_ade" <-
-  function(form, train, specs, lambda, lfun, meta_model_type) {
+  function(form, train, specs, lambda, lfun, meta_model_type, num_cores) {
+    if (length(num_cores) > 1 || !is.numeric(num_cores)) {
+      stop("Please specify a numeric value for num_cores. num_cores = 1
+           leads to sequential training of models. num_cores > 1
+           splits the training of the base models across num_cores cores.")
+    }
+    if (is.null(num_cores)) num_cores <- 1
+
     tgt <- get_target(form)
 
     cat("Setting up meta data\n")
@@ -36,11 +54,12 @@
         .rbind = FALSE,
         form = form,
         specs = specs,
-        lfun = lfun
+        lfun = lfun,
+        num_cores = num_cores
       )
 
     cat("Building base ensemble...\n")
-    M <- build_base_ensemble(form, train, specs)
+    M <- build_base_ensemble(form, train, specs, num_cores)
 
     OOB <- rbind_l(lapply(OOB_data, function(x) x$oob))
     train_loss <- rbind_l(lapply(OOB_data, function(x) x$mloss))
@@ -54,14 +73,24 @@
                                               score = l_hat))
 
     cat("Training meta models (an arbiter for each expert\n")
+    if (num_cores > 1) {
+      cl <- parallel::makeCluster(num_cores)
+      doParallel::registerDoParallel(cl)
+      `%partrain%` <- `%dopar%`
+    } else {
+      `%partrain%` <- `%do%`
+    }
+
     meta_models <-
-      lapply(train_metadata,
-             function(meta_set) {
-              if (any(is.na(meta_set))) {
-                meta_set <- soft.completion(meta_set)
-              }
-               loss_meta_learn(score ~ ., meta_set, meta_model_type)
-             })
+      foreach::foreach(meta_set = train_metadata,
+                       .packages = "tsensembler") %partrain% {
+
+                         if (any(is.na(meta_set))) {
+                           meta_set <- soft.completion(meta_set)
+                         }
+
+                         loss_meta_learn(score ~ ., meta_set, meta_model_type)
+                       }
 
     list(
       base_ensemble = M,
@@ -179,6 +208,11 @@ forecast_ade <-
 #' with new observations (for example, validation set). Each meta model
 #' is retrained using \code{newdata}.
 #'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
 #' @family updating models
 #'
 #' @seealso \code{\link{ADE-class}} for building an ADE model;
@@ -209,14 +243,14 @@ forecast_ade <-
 #'
 #' @export
 setGeneric("update_ade_meta",
-           function(object, newdata) {
+           function(object, newdata, num_cores=1) {
              standardGeneric("update_ade_meta")
            })
 
 #' @rdname update_ade_meta
 setMethod("update_ade_meta",
           signature("ADE"),
-          function(object, newdata) {
+          function(object, newdata, num_cores=1) {
             OOB_data <-
               blocked_prequential(
                 x = newdata,
@@ -225,7 +259,8 @@ setMethod("update_ade_meta",
                 .rbind = FALSE,
                 form = object@form,
                 specs = object@specs,
-                lfun = ae
+                lfun = ae,
+                num_cores=num_cores
               )
 
             tgt <- get_target(object@form)
@@ -277,6 +312,11 @@ setMethod("update_ade_meta",
 #' with new observations (for example, validation set). Each model
 #' is retrained using \code{newdata}.
 #'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
 #' @family updating models
 #'
 #' @seealso \code{\link{ADE-class}} for building an ADE model;
@@ -308,17 +348,17 @@ setMethod("update_ade_meta",
 #'
 #' @export
 setGeneric("update_ade",
-           function(object, newdata) {
+           function(object, newdata, num_cores=1) {
              standardGeneric("update_ade")
            })
 
 #' @rdname update_ade
 setMethod("update_ade",
           signature("ADE"),
-          function(object, newdata) {
+          function(object, newdata,num_cores=1) {
 
-            object <- update_base_models(object, newdata)
-            object <- update_ade_meta(object, newdata)
+            object <- update_base_models(object, newdata,num_cores)
+            object <- update_ade_meta(object, newdata,num_cores)
 
             object
           })

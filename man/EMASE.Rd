@@ -30,4 +30,5 @@ Other weighting base models: \code{\link{build_committee}},
   \code{\link{model_recent_performance}},
   \code{\link{model_weighting}}, \code{\link{select_best}}
 }
+\concept{weighting base models}
 \keyword{internal}

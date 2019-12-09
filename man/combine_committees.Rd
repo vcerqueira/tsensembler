@@ -7,7 +7,7 @@
 combine_committees(predict_info, FUN, object, newdata)
 }
 \arguments{
-\item{predict_info}{data from ...}
+\item{predict_info}{output of \strong{hat_info} function}
 
 \item{FUN}{function used to combine the models in each
 subset.}

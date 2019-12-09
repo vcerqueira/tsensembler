@@ -16,6 +16,11 @@
 #' is retrained, so \code{newdata} should be the past data used for initially training
 #' the models along with any further available observations.
 #'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
 #' @seealso \code{\link{ADE-class}} for the ADE model information, and
 #' \code{\link{DETS-class}} for the DETS model information;
 #' \code{\link{update_ade_meta}} for updating the meta models of an ADE ensemble.
@@ -62,21 +67,21 @@
 #'   else
 #'     modeldets <- update_weights(modeldets, test[seq_len(i), ])
 #' }
-#' 
+#'
 #'
 #' @export
 setGeneric("update_base_models",
-           function(object, newdata) {
+           function(object, newdata, num_cores=1) {
              standardGeneric("update_base_models")
            })
 
 #' @rdname update_base_models
 setMethod("update_base_models",
           signature("ADE"),
-          function(object, newdata) {
+          function(object, newdata, num_cores=1) {
 
             object@base_ensemble <-
-              build_base_ensemble(object@form, newdata, object@specs)
+              build_base_ensemble(object@form, newdata, object@specs, num_cores)
 
             object <- update_weights(object, newdata)
 
@@ -86,11 +91,11 @@ setMethod("update_base_models",
 #' @rdname update_base_models
 setMethod("update_base_models",
           signature("DETS"),
-          function(object, newdata) {
+          function(object, newdata, num_cores=1) {
             recent_lambda_k <- recent_lambda_observations(newdata, object@lambda)
 
             object@base_ensemble <-
-              build_base_ensemble(object@form, newdata, object@specs)
+              build_base_ensemble(object@form, newdata, object@specs, num_cores)
 
             object@recent_series <- recent_lambda_k
 

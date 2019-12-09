@@ -57,7 +57,7 @@ for (i in seq_along(predictions)) {
   model <- update_weights(model, test[i, ])
 }
 
-all.equal(predictions1, predictions)
+#all.equal(predictions1, predictions)
 
 
 }
@@ -69,3 +69,4 @@ for a \code{\link{DETS}} model
 Other updating models: \code{\link{update_ade_meta}},
   \code{\link{update_ade}}
 }
+\concept{updating models}

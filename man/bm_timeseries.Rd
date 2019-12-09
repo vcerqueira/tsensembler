@@ -7,12 +7,27 @@
 bm_timeseries(form, data, lpars)
 }
 \arguments{
-\item{form}{form}
+\item{form}{formula}
 
-\item{data}{training data}
+\item{data}{training data (see example)}
 
-\item{lpars}{list of parameters}
+\item{lpars}{list of parameters (see example)}
 }
 \description{
-Classical time series models
+Fit classical time series models, such as ARIMA
+or exponential smoothing, to a time series
 }
+\examples{
+
+data("water_consumption")
+
+x <- embed_timeseries(water_consumption, 5)[1:100,]
+
+form <- target ~.
+lpars <-
+list(bm_timeseries = list(model = c("bm_arima","bm_tbats")))
+
+bmodels <- bm_timeseries(form, x, lpars)
+
+}
+\keyword{internal}

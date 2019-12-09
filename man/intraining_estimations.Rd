@@ -4,7 +4,7 @@
 \alias{intraining_estimations}
 \title{Out-of-bag loss estimations}
 \usage{
-intraining_estimations(train, test, form, specs, lfun)
+intraining_estimations(train, test, form, specs, lfun, num_cores)
 }
 \arguments{
 \item{train}{train set from the training set;}
@@ -17,6 +17,11 @@ intraining_estimations(train, test, form, specs, lfun)
 the specifications of the base models.}
 
 \item{lfun}{loss function for metalearning. Defaults to ae -- absolute error.}
+
+\item{num_cores}{A numeric value to specify the number of cores used to
+train base and meta models. num_cores = 1
+leads to sequential training of models. num_cores > 1
+splits the training of the base models across num_cores cores.}
 }
 \value{
 A list containing two objects:
@@ -32,4 +37,5 @@ A pipeline for retrieving out-of-bag loss estimations
 \seealso{
 Other out-of-bag functions: \code{\link{intraining_predictions}}
 }
+\concept{out-of-bag functions}
 \keyword{internal}

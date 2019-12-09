@@ -44,3 +44,4 @@ Other weighting base models: \code{\link{EMASE}},
   \code{\link{model_recent_performance}},
   \code{\link{select_best}}
 }
+\concept{weighting base models}

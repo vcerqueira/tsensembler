@@ -55,3 +55,4 @@ next_vals_ade <- forecast(model2, h = 2)
 for updating the weights of a model after forecasting; \code{\link{update_base_models}}
 for updating the base models of an ensemble.
 }
+\concept{forecasting using ensembles}

@@ -13,6 +13,11 @@
 #'
 #' @param lfun loss function for metalearning. Defaults to ae -- absolute error.
 #'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
 #' @family out-of-bag functions
 #'
 #' @keywords internal
@@ -26,13 +31,19 @@
 #'
 #' @export
 intraining_estimations <-
-  function(train, test, form, specs, lfun) {
-    utils::capture.output(M <- build_base_ensemble(form, train, specs))
+  function(train, test, form, specs, lfun, num_cores) {
+    utils::capture.output(M <- build_base_ensemble(form, train, specs, num_cores))
     Y <- get_y(test, form)
     Y_tr <- get_y(train, form)
 
     Y_hat <- predict(M, test)
-    model_loss <- base_models_loss(Y_hat, Y, lfun, Y_tr)
+    model_loss <-
+      base_models_loss(
+        Y_hat = Y_hat,
+        Y = Y,
+        lfun = lfun,
+        y_tr = Y_tr
+      )
 
     list(mloss = model_loss,
          oob = test,

@@ -1,7 +1,23 @@
+#' Fitting an ARIMA model
+#' Using function \strong{auto.arima} from forecast package
+#'
+#' @param y time series struture after applying
+#' function \strong{embed_timeseries}
+#'
+#' @param form formula
+#'
+#' @keywords internal
+#'
+#' @export
 bm_arima <-
   function(y, form) {
     tm_ids <- c(1, grep("Tm", colnames(y)))
-    train_xreg <- as.matrix(subset(y, select = -tm_ids))
+    train_xreg <- subset(y, select = -tm_ids)
+    if (ncol(train_xreg) < 1) {
+      train_xreg <- NULL
+    } else {
+      train_xreg <- as.matrix(train_xreg)
+    }
 
     y <- get_y(y, form)
     model <- tryCatch(forecast::auto.arima(y = y, xreg = train_xreg),
@@ -14,6 +30,53 @@ bm_arima <-
     model
   }
 
+#' Predict function for a model created from bm_arima
+#'
+#' @param model model created using \strong{bm_arima} function
+#'
+#' @param test test data created using \strong{embed_timeseries} function
+#'
+#' @keywords internal
+#'
+#' @export
+arima_predict <-
+  function(model,test) {
+
+    tm_ids <- c(1, grep("Tm", colnames(test)))
+    test_xreg <- subset(test, select = -tm_ids)
+    if (ncol(test_xreg) < 1) {
+      test_xreg <- NULL
+    } else {
+      test_xreg <- as.matrix(test_xreg)
+    }
+
+    y <- get_y(test, model$form)
+
+    preds <- as.vector(forecast::Arima(y = y,
+                                       model=model,
+                                       xreg = test_xreg)$fitted)
+    # preds <- tryCatch(as.vector(forecast::Arima(y = y, model=model, xreg = test_xreg)$fitted),
+    #                   error = function(e) NA)
+
+    # if (is.na(preds[1])) {
+    #   preds <- rep(mean(y), times = length(y))
+    # }
+
+    preds
+  }
+
+
+#' Fitting an Exponential Smoothing model
+#' Using function \strong{ets} from forecast package
+#'
+#' @param y time series struture after applying
+#' function \strong{embed_timeseries}
+#'
+#' @param form formula
+#'
+#' @keywords internal
+#'
+#' @export
 bm_ets <-
   function(y, form) {
     y <- get_y(y, form)
@@ -24,37 +87,24 @@ bm_ets <-
     model
   }
 
-arima_predict <-
-  function(model,test) {
 
-    tm_ids <- c(1, grep("Tm", colnames(test)))
-    test_xreg <- as.matrix(subset(test, select = -tm_ids))
 
-    y <- get_y(test, model$form)
 
-    preds <- tryCatch(as.vector(forecast::Arima(y, model=model, xreg = test_xreg)$fitted),
-                      error = function(e) NA)
-
-    if (is.na(preds[1])) {
-      preds <- tryCatch(as.vector(forecast(model, h=1, xreg = test_xreg)$mean),
-                        error = function(e) NA)
-    }
-
-    if (is.na(preds[1])) {
-      preds <- rep(mean(y), times = length(y))
-    }
-
-    #as.vector(fitted(preds))
-    #as.vector(preds$fitted)
-    preds
-  }
-
+#' Predict function for a model created from bm_ets
+#'
+#' @param model model created using \strong{bm_ets} function
+#'
+#' @param test test data created using \strong{embed_timeseries} function
+#'
+#' @keywords internal
+#'
+#' @export
 ets_predict <-
   function(model,test) {
     y <- get_y(test, model$form)
 
-    preds <- tryCatch(forecast::ets(y = y, model = model),
-                      error = function(e) NA)
+    suppressMessages(preds <- tryCatch(forecast::ets(y = y, model = model),
+                      error = function(e) NA))
 
     if (is.na(preds[1])) {
       trainset <- model$x
@@ -68,11 +118,20 @@ ets_predict <-
       predsf <- as.vector(preds$fitted)
     }
 
-    #as.vector(fitted(preds))
     as.vector(predsf)
   }
 
-
+#' Fitting an tbats model
+#' Using function \strong{tbats} from forecast package
+#'
+#' @param y time series struture after applying
+#' function \strong{embed_timeseries}
+#'
+#' @param form formula
+#'
+#' @keywords internal
+#'
+#' @export
 bm_tbats <-
   function(y, form) {
     y <- get_y(y, form)
@@ -82,6 +141,15 @@ bm_tbats <-
     model
   }
 
+#' Predict function for a model created from bm_tbats
+#'
+#' @param model model created using \strong{bm_tbats} function
+#'
+#' @param test test data created using \strong{embed_timeseries} function
+#'
+#' @keywords internal
+#'
+#' @export
 tbats_predict <-
   function(model,test) {
     y <- get_y(test, model$form)
@@ -91,15 +159,31 @@ tbats_predict <-
                         rep(mean(model$y, times = length(y)))
                       })
 
-    #as.vector(preds$fitted.values)
     preds
   }
 
 #' Classical time series models
 #'
-#' @param form form
-#' @param data training data
-#' @param lpars list of parameters
+#' Fit classical time series models, such as ARIMA
+#' or exponential smoothing, to a time series
+#'
+#' @param form formula
+#' @param data training data (see example)
+#' @param lpars list of parameters (see example)
+#'
+#' @examples
+#'
+#' data("water_consumption")
+#'
+#' x <- embed_timeseries(water_consumption, 5)[1:100,]
+#'
+#' form <- target ~.
+#' lpars <-
+#' list(bm_timeseries = list(model = c("bm_arima","bm_tbats")))
+#'
+#' bmodels <- bm_timeseries(form, x, lpars)
+#'
+#' @keywords internal
 #'
 #' @export
 bm_timeseries <-
@@ -111,6 +195,7 @@ bm_timeseries <-
     }
 
     nmodels <- length(lpars$timeseries$model)
+
     j <- 0
     ensemble <- vector("list", nmodels)
     mnames <- character(nmodels)
@@ -118,8 +203,6 @@ bm_timeseries <-
         j <- j + 1L
 
         mnames[j] <- gsub("bm_","",modeltype)
-        cat(mnames[j],"\n")
-
 
         utils::capture.output(ensemble[[j]] <-
           do.call(modeltype, list(y = data, form = form)))
@@ -304,7 +387,7 @@ bm_glm <-
       lpars$bm_glm$family <- "gaussian"
     }
 
-    X <- stats::model.matrix(form, data)
+    X <- model.matrix.na(form, data)
     Y <- get_y(data, form)
 
     nmodels <-
@@ -484,7 +567,7 @@ bm_randomforest <-
       for (mtry in lpars$bm_randomforest$mtry) {
         j <- j + 1L
 
-        mnames[j] <- paste0("rf_n_", num.trees)#, "m_", mtry)
+        mnames[j] <- paste0("rf_n_", num.trees, "_m_", mtry)
         cat(mnames[j],"\n")
         if (!is.null(lpars$rm_ids)) {
           if (mnames[j] %in% names(lpars$rm_ids)) {
@@ -548,7 +631,7 @@ bm_cubist <-
       length(lpars$bm_cubist$committees) *
       length(lpars$bm_cubist$neighbors)
 
-    X <- stats::model.matrix(form, data)
+    X <- model.matrix.na(form, data)
     Y <- get_y(data, form)
 
     j <- 0
@@ -572,6 +655,8 @@ bm_cubist <-
 
         ensemble[[j]] <-
           cubist(X, Y, committees = ncom, neighbors = neighbors)
+
+        ensemble[[j]]$neighbors <- neighbors
 
       }
     }
@@ -618,20 +703,25 @@ bm_mars <-
     if (is.null(lpars$bm_mars$thresh))
       lpars$bm_mars$thresh <- 0.001
 
+    if (is.null(lpars$bm_mars$pmethod))
+      lpars$bm_mars$pmethod <- "backward"
+
     nmodels <-
       length(lpars$bm_mars$nk) *
       length(lpars$bm_mars$degree) *
-      length(lpars$bm_mars$thresh)
+      length(lpars$bm_mars$thresh) *
+      length(lpars$bm_mars$pmethod)
 
     j <- 0
     ensemble <- vector("list", nmodels)
     mnames <- character(nmodels)
     for (nk in lpars$bm_mars$nk) {
+      for (method_ in lpars$bm_mars$pmethod) {
       for (degree in lpars$bm_mars$degree) {
         for (thresh in lpars$bm_mars$thresh) {
           j <- j + 1L
 
-          mnames[j] <- paste0("mars_nk_", nk, "_d_", degree, "_t_", thresh)
+          mnames[j] <- paste0("mars_nk_", nk, "_d_", degree, "_t_", thresh,"_m_",method_)
           cat(mnames[j],"\n")
           if (!is.null(lpars$rm_ids)) {
             if (mnames[j] %in% names(lpars$rm_ids)) {
@@ -646,9 +736,11 @@ bm_mars <-
                   data,
                   nk = nk,
                   degree = degree,
-                  thresh = thresh)
+                  thresh = thresh,
+                  pmethod=method_)
 
         }
+      }
       }
     }
     names(ensemble) <- mnames
@@ -763,7 +855,7 @@ bm_svr <-
 #' \code{\link{bm_randomforest}}; \code{\link{bm_pls_pcr}};
 #' \code{\link{bm_gaussianprocess}}; \code{\link{bm_svr}}
 #'
-#' @import nnet
+#' @import monmlp
 #' @keywords internal
 #'
 #' @export
@@ -772,58 +864,104 @@ bm_ffnn <-
     if (is.null(lpars$bm_ffnn))
       lpars$bm_ffnn <- list()
 
-    if (is.null(lpars$bm_ffnn$trace))
-      lpars$bm_ffnn$trace <- FALSE
-    if (is.null(lpars$bm_ffnn$linout))
-      lpars$bm_ffnn$linout <- TRUE
-    if (is.null(lpars$bm_ffnn$size))
-      lpars$bm_ffnn$size <- 30
-    if (is.null(lpars$bm_ffnn$decay))
-      lpars$bm_ffnn$decay <- 0.01
-    if (is.null(lpars$bm_ffnn$maxit))
-      lpars$bm_ffnn$maxit <- 750
+    if (is.null(lpars$bm_ffnn$hidden1))
+      lpars$bm_ffnn$hidden1 <- 10
+    if (is.null(lpars$bm_ffnn$hidden2))
+      lpars$bm_ffnn$hidden2 <- 0
 
     nmodels <-
-      length(lpars$bm_ffnn$maxit) *
-      length(lpars$bm_ffnn$size) *
-      length(lpars$bm_ffnn$decay)
+      length(lpars$bm_ffnn$hidden1) *
+      length(lpars$bm_ffnn$hidden2)
+
+    X <- as.matrix(model.matrix.na(form, data))
+    Y <- as.matrix(get_y(data, form))
 
     j <- 0
     ensemble <- vector("list", nmodels)
     mnames <- character(nmodels)
-    for (maxit in lpars$bm_ffnn$maxit) {
-      for (size in lpars$bm_ffnn$size) {
-        for (decay in lpars$bm_ffnn$decay) {
+    for (n1 in lpars$bm_ffnn$hidden1) {
+        for (n2 in lpars$bm_ffnn$hidden2) {
           j <- j + 1L
 
-          mnames[j] <- paste0("nnet_s_", size, "_d_", decay, "_m_", maxit)
+          mnames[j] <- paste0("nnet_s1_", n1, "_s2_", n2)
           cat(mnames[j],"\n")
-          if (!is.null(lpars$rm_ids)) {
-            if (mnames[j] %in% names(lpars$rm_ids)) {
-              rm_ids <- lpars$rm_ids[[mnames[j]]]
-              data <- data[-rm_ids, ]
-            }
-          }
 
           ensemble[[j]] <-
-            nnet(
-              form,
-              data,
-              linout = lpars$bm_ffnn$linout,
-              size = size,
-              maxit = maxit,
-              decay = decay,
-              trace = lpars$bm_ffnn$trace,
-              MaxNWts = 1000000
+            monmlp.fit(
+              X,
+              Y,
+              hidden1=n1,
+              hidden2=n2,
+              n.ensemble=1,
+              bag=F,
+              silent=T
             )
 
-        }
       }
     }
     names(ensemble) <- mnames
 
     ensemble
   }
+
+
+# bm_ffnn <-
+#   function(form, data, lpars) {
+#     if (is.null(lpars$bm_ffnn))
+#       lpars$bm_ffnn <- list()
+#
+#     if (is.null(lpars$bm_ffnn$trace))
+#       lpars$bm_ffnn$trace <- FALSE
+#     if (is.null(lpars$bm_ffnn$linout))
+#       lpars$bm_ffnn$linout <- TRUE
+#     if (is.null(lpars$bm_ffnn$size))
+#       lpars$bm_ffnn$size <- 30
+#     if (is.null(lpars$bm_ffnn$decay))
+#       lpars$bm_ffnn$decay <- 0.01
+#     if (is.null(lpars$bm_ffnn$maxit))
+#       lpars$bm_ffnn$maxit <- 750
+#
+#     nmodels <-
+#       length(lpars$bm_ffnn$maxit) *
+#       length(lpars$bm_ffnn$size) *
+#       length(lpars$bm_ffnn$decay)
+#
+#     j <- 0
+#     ensemble <- vector("list", nmodels)
+#     mnames <- character(nmodels)
+#     for (maxit in lpars$bm_ffnn$maxit) {
+#       for (size in lpars$bm_ffnn$size) {
+#         for (decay in lpars$bm_ffnn$decay) {
+#           j <- j + 1L
+#
+#           mnames[j] <- paste0("nnet_s_", size, "_d_", decay, "_m_", maxit)
+#           cat(mnames[j],"\n")
+#           if (!is.null(lpars$rm_ids)) {
+#             if (mnames[j] %in% names(lpars$rm_ids)) {
+#               rm_ids <- lpars$rm_ids[[mnames[j]]]
+#               data <- data[-rm_ids, ]
+#             }
+#           }
+#
+#           ensemble[[j]] <-
+#             nnet(
+#               form,
+#               data,
+#               linout = lpars$bm_ffnn$linout,
+#               size = size,
+#               maxit = maxit,
+#               decay = decay,
+#               trace = lpars$bm_ffnn$trace,
+#               MaxNWts = 1000000
+#             )
+#
+#         }
+#       }
+#     }
+#     names(ensemble) <- mnames
+#
+#     ensemble
+#   }
 
 
 #' Fit PLS/PCR regression models
