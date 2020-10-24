@@ -31,17 +31,33 @@ train <- dataset[1:1000,]
 test <- dataset[1001:1020, ]
 
 # setting up base model parameters
-specs <- model_specs(
-  learner = c("bm_ppr","bm_glm","bm_svr","bm_mars"), 
-  learner_pars = list(
-    bm_glm = list(alpha = c(0, .5, 1)),
-    bm_svr = list(kernel = c("rbfdot", "polydot"),
-                  C = c(1,3)),
-    bm_ppr = list(nterms = 4)
-  ))
+
+nall_kernels <- c("rbfdot","polydot","vanilladot","laplacedot")
+
+pars_predictors <- list(
+  bm_gaussianprocess = list(kernel = nall_kernels, tol = c(.001)),
+  bm_svr = list(kernel = nall_kernels, C=c(1, 5), epsilon=c(.1,0.01)),
+  bm_ppr = list(nterms = c(2,4),
+                sm.method = c("supsmu","gcvspline")),
+  bm_mars = list(degree = c(1, 3), nk = c(10,20),
+                 thresh=c(0.001),
+                 pmethod=c("forward")),
+  bm_glm = list(alpha = c(0,.25,.5,.75,1),
+                family = c("gaussian")),
+  bm_randomforest = list(num.trees = c(250,500),
+                         mtry = c(5,10)),
+  bm_pls_pcr = list(method = c("simpls","kernelpls","svdpc")),
+  bm_cubist  = list(committees= c(1,5, 15)),
+  bm_xgb = list()
+)
+
+
+base_predictors <- names(pars_predictors)
+
+specs <- model_specs(base_predictors,pars_predictors)
 
 # building the ensemble
-model <- ADE(target ~., train, specs)
+model <- quickADE(target ~., train, specs)
 
 # forecast next value and update base and meta models
 # every three points;
@@ -60,7 +76,6 @@ for (i in seq_along(predictions)) {
     model <- update_weights(model, test[i, ])
 }
 
-point_forecast <- forecast(model, h = 5)
 
 # setting up an ensemble of support vector machines
 specs2 <-
