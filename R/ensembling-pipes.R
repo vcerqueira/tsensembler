@@ -53,7 +53,6 @@ select_best <- function(model_scores) {
 #' @export
 model_recent_performance <-
   function(Y_hat, Y, lambda, omega, pre_weights) {
-    cat("using old rp\n")
     sqr_err <-
       vapply(Y_hat,
              function(p) {
@@ -182,7 +181,7 @@ build_committee <-
       which(rolled_loss[j, ] < beta[j])
     })
 
-    nullC <- which(vnapply(C, length) < 1)
+    nullC <- which(vapply(C, length, numeric(1)) < 1)
     for (k in nullC)
       C[[k]] <- seq_len(ncol(Y_loss))
 
@@ -222,11 +221,11 @@ build_committee <-
 #'
 #' @export
 model_weighting <- function(x, trans = "softmax", ...) {
-  if (!trans %in% c("softmax", "linear", "erfc", "erfcmax"))
+  if (!trans %in% c("softmax", "linear"))
     stop("Please choose a proper model weighting strategy\n", call. = FALSE)
 
   if (is.list(x))
-    x <- unlistn(x)
+    x <- unlist(x, use.names = FALSE)
 
   if (all(is.na(x))) {
     warning("in model_weighting, all vector is na.")
@@ -244,32 +243,14 @@ model_weighting <- function(x, trans = "softmax", ...) {
       x <- x / 2
     }
   } else if (trans == "linear") {
-    nx <- normalize(-x, ...)
+    nx <- normalize(-x)
     w <- proportion(nx)
-  } else if (trans == "erfcmax") {
-    e_f <- erfc(x, alpha = 1/max(x))
-    w <- e_f / sum(e_f)
-  } else {
-    nx <- normalize(x, ...)
-    e_nx <- erfc(nx)
-    w <- proportion(e_nx, ...)
   }
 
   w[is.na(w)] <- 0.
 
   w
 }
-
-struc_embed <-
-  function(object, in_val) {
-    rseries <- object@recent_series
-    last_embed <- unlist(rseries[nrow(rseries), ])
-    next_embed <- as.data.frame(t(FIFO(last_embed, in_val)))
-    colnames(next_embed) <- colnames(rseries)
-
-    next_embed
-  }
-
 
 #' Computing the error of base models
 #'
@@ -280,21 +261,17 @@ struc_embed <-
 #'
 #' @param lfun loss function to compute. Defaults to \code{ae}, absolute
 #' error
-#' @param y_tr target of training set
 #'
 #' @keywords internal
 #'
 #' @export
 base_models_loss <-
-  function(Y_hat, Y, lfun = se, y_tr) {
-
-    #alpha <- .3
-    #Y_combined <- rowMeans(Y_hat)
+  function(Y_hat, Y, lfun = se) {
 
     models_loss <-
         lapply(Y_hat,
                function(o) {
-                 lfun(Y, o, y_tr)
+                 lfun(Y, o)
                })
 
     as.data.frame(models_loss)

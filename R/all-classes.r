@@ -364,12 +364,7 @@ model_specs <-
         "bm_mars",
         "bm_cubist",
         "bm_pls_pcr",
-        "bm_prophet",
-        "bm_ets",
-        "bm_timeseries",
-        "bm_xgb",
-        "bm_deepffnn",
-        "bm_lstm"
+        "bm_xgb"
         )
 
     if (!all(learner %in% .available_models))
@@ -512,8 +507,7 @@ setMethod("show",
 #' Artificial Neural Networks. Springer, Cham, 2017, pp. 720–732
 #'
 #' @seealso \code{\link{model_specs-class}} for setting up the ensemble parameters
-#' for an \strong{ADE} model; \code{\link{forecast}} for the forecasting method
-#' that uses an \strong{ADE} model for forecasting future values;
+#' for an \strong{ADE} model;
 #' \code{\link{predict}} for the method that predicts new held out observations;
 #' \code{\link{update_weights}} for the method used to update the
 #' weights of an \strong{ADE} model between successive predict or forecast calls;
@@ -639,8 +633,7 @@ setClass("ADE",
 #' Artificial Neural Networks. Springer, Cham, 2017, pp. 720–732
 #'
 #' @seealso \code{\link{model_specs-class}} for setting up the ensemble parameters
-#' for an \strong{ADE} model; \code{\link{forecast}} for the forecasting method
-#' that uses an \strong{ADE} model for forecasting future values;
+#' for an \strong{ADE} model;
 #' \code{\link{predict}} for the method that predicts new held out observations;
 #' \code{\link{update_weights}} for the method used to update the
 #' weights of an \strong{ADE} model between successive predict or forecast calls;
@@ -713,6 +706,82 @@ setClass("ADE",
 
     M <-
       train_ade(
+        form = form,
+        train = data,
+        specs = specs,
+        lambda = lambda,
+        lfun = meta_loss_fun,
+        meta_model_type = meta_model_type,
+        num_cores = num_cores)
+
+    methods::new(
+      "ADE",
+      base_ensemble = M$base_ensemble,
+      meta_model = M$meta_model,
+      form = form,
+      specs = specs,
+      lambda = lambda,
+      omega = omega,
+      select_best = select_best,
+      all_models = all_models,
+      aggregation = aggregation,
+      sequential_reweight = sequential_reweight,
+      recent_series = M$recent_series,
+      out_of_bag = M$OOB,
+      meta_model_type = meta_model_type
+    )
+  }
+
+
+
+#' Quick Arbitrated Dynamic Ensemble
+#'
+#' @rdname ADE
+#'
+#' @export
+"quickADE" <-
+  function(form,
+           data,
+           specs,
+           lambda = 50,
+           omega = .5,
+           select_best = FALSE,
+           all_models = FALSE,
+           aggregation = "linear",
+           sequential_reweight = FALSE,
+           meta_loss_fun = ae,
+           meta_model_type = "randomforest",
+           num_cores = 1) {
+
+    if (select_best && is.numeric(omega))
+      warning(
+        "ADE setup with both selection of best learner and
+        a committee (\"omega\" parameter).
+        \"omega\" parameter will be ignored."
+        )
+
+    if (all_models && is.numeric(omega))
+      warning(
+        "ADE setup with both selection of all learners and
+        a committee (\"omega\" parameter).
+        \"omega\" parameter will be ignored."
+        )
+
+    if (select_best && all_models)
+      stop("Choose either \"select_best\" or \"all_models\" option.",
+           call. = FALSE)
+
+    if (!is.null(omega))
+      if (omega >= 1 | omega <= 0)
+        stop("\"omega\" parameter must be a double between 0 and 1",
+             call. = FALSE)
+
+    if (lambda < 1 | lambda > nrow(data))
+      stop("\"lambda\" parameter must be a positive integer < nrow(data)",
+           call. = FALSE)
+
+    M <-
+      train_ade_quick(
         form = form,
         train = data,
         specs = specs,
@@ -881,8 +950,7 @@ ade_hat <- function(y_hat, Y_hat, Y_committee, E_hat) {
 #' Analytics (DSAA), 2017 IEEE International Conference on. IEEE, 2017.
 #'
 #' @seealso \code{\link{model_specs-class}} for setting up the ensemble parameters
-#' for an \strong{DETS} model; \code{\link{forecast}} for the method
-#' that uses an \strong{DETS} model for forecasting future values;
+#' for an \strong{DETS} model;
 #' \code{\link{predict}} for the method that predicts new held out observations;
 #' \code{\link{update_weights}} for the method used to update the
 #' weights of an \strong{DETS} model between successive predict or forecast calls;
@@ -978,8 +1046,7 @@ setClass("DETS",
 #' Analytics (DSAA), 2017 IEEE International Conference on. IEEE, 2017.
 #'
 #' @seealso \code{\link{model_specs-class}} for setting up the ensemble parameters
-#' for an \strong{DETS} model; \code{\link{forecast}} for the method
-#' that uses an \strong{DETS} model for forecasting future values;
+#' for an \strong{DETS} model;
 #' \code{\link{predict}} for the method that predicts new held out observations;
 #' \code{\link{update_weights}} for the method used to update the
 #' weights of an \strong{DETS} model between successive predict or forecast calls;
@@ -1090,48 +1157,4 @@ dets_hat <- function(y_hat, Y_hat, Y_committee, W) {
   )
 }
 
-#' Forecasting using an ensemble predictive model
-#'
-#' Generic function for forecasting
-#' future values of a time series from an \code{\link{ADE-class}} model or a
-#' \code{\link{DETS-class}} model.
-#'
-#' @seealso \code{\link{predict}} for the predict method; \code{\link{update_weights}}
-#' for updating the weights of a model after forecasting; \code{\link{update_base_models}}
-#' for updating the base models of an ensemble.
-#'
-#' @param object predictive model object. A \code{\link{ADE-class}}
-#' or a \code{\link{DETS-class}} ensemble object;
-#'
-#' @param h steps to forecast
-#'
-#' @family forecasting using ensembles
-#'
-#' @note the \code{forecast} generic in \strong{tsensembler} assumes that the
-#' data is purely auto-regressive (no external variables), and that the target variable
-#' is the first column of the data provided. For a different data setup, the
-#' predict methods (\code{\link{predict}})
-#' can be used (with successive calls with updates for multi-step forecasting).
-#'
-#' @examples
-#' specs <- model_specs(
-#'  learner = c("bm_svr", "bm_glm", "bm_mars"),
-#'  learner_pars = NULL
-#' )
-#'
-#' data("water_consumption")
-#' dataset <- embed_timeseries(water_consumption, 5)
-#' train <- dataset[1:500, ]
-#'
-#' model <- DETS(target ~., train, specs)
-#' model2 <- ADE(target ~., train, specs, lambda = 30)
-#'
-#' next_vals_dets <- forecast(model, h = 2)
-#' next_vals_ade <- forecast(model2, h = 2)
-#'
-#'
-#' @export
-setGeneric("forecast",
-           function(object, h) {
-             standardGeneric("forecast")
-           })
+

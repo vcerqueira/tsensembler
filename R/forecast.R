@@ -26,8 +26,10 @@ compute_predictions <-
 
     mnames_raw <- names(M)
     mnames <-
-      vcapply(mnames_raw, function(o)
-        split_by_(o)[1])
+      vapply(mnames_raw,
+             function(o) {
+               split_by_(o)[1]
+             }, character(1), USE.NAMES = FALSE)
 
     Y_hat <- list()
     time_cost <- c()
@@ -45,24 +47,9 @@ compute_predictions <-
             newX <- as.matrix(stats::model.matrix(form, data))
             monmlp.predict(newX, M[[bm]])[,1]
           },
-          "arima" = {
-            arima_predict(M[[bm]], data)
-          },
-          "ets" = {
-            ets_predict(M[[bm]], data)
-          },
-          "tbats" = {
-            tbats_predict(M[[bm]], data)
-          },
           "xgb" = {
             xgb_predict(M[[bm]], data)
           },
-          #"lstm" = {
-          #  predict_lstm(M[[bm]], data)
-          #},
-          #"deepffnn" = {
-          #  predict_deepffnn(M[[bm]], data)
-          #},
           "glm" = {
             X_bm <- M[[bm]]$beta@Dimnames[[1]]
             data <- data[colnames(data) %in% c(target_var, X_bm)]
@@ -126,20 +113,20 @@ combine_predictions <-
     seq. <- seq_len(nrow(Y_hat))
     if (!is.null(committee))
       y_hat <-
-        vnapply(seq.,
+        vapply(seq.,
                 function(j) {
                   Y_hat_j <- Y_hat[j, committee[[j]]]
                   W_j <- proportion(W[j, committee[[j]]])
                   sum(Y_hat_j * W_j)
-                })
+                }, numeric(1), USE.NAMES = FALSE)
     else
       y_hat <-
-        vnapply(seq.,
+        vapply(seq.,
                 function(j) {
                   Y_hat_j <- Y_hat[j, ]
                   W_j <- proportion(W[j, ])
                   sum(Y_hat_j * W_j)
-                })
+                }, numeric(1), USE.NAMES = FALSE)
 
     y_hat
   }

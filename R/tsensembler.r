@@ -31,8 +31,6 @@
 #'
 #' @seealso \code{\link{ADE-class}} for setting up an \strong{ADE} model;
 #' and \code{\link{DETS-class}} for setting up an \strong{DETS} model;
-#' see \code{\link{forecast}} to check the generic function for forecasting
-#' future values of a time series using an ensemble from \emph{tsensembler};
 #' see also \code{\link{update_weights}} and \code{\link{update_base_models}}
 #' to check the generic function for updating the predictive models in
 #' an ensemble.
@@ -53,7 +51,7 @@
 #' IEEE International Conference on. IEEE, 2017.
 #'
 #' @examples
-#' 
+#'
 #' \dontrun{
 #'
 #' data("water_consumption")
@@ -66,7 +64,7 @@
 #'
 #' # setting up base model parameters
 #' specs <- model_specs(
-#'   learner = c("bm_ppr","bm_glm","bm_svr","bm_mars"), 
+#'   learner = c("bm_ppr","bm_glm","bm_svr","bm_mars"),
 #'   learner_pars = list(
 #'     bm_glm = list(alpha = c(0, .5, 1)),
 #'     bm_svr = list(kernel = c("rbfdot", "polydot"),

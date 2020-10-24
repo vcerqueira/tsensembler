@@ -92,15 +92,6 @@ learning_base_models <-
                          do.call(learner[o], c(list(form, train, lpars)))
                        }
 
-    # learner <- learner[-3]
-    # base_model <-
-    #   lapply(seq_along(learner), function(o) {
-    #     cat("\n\n",learner[o],"\n")
-    #
-    #     do.call(learner[o], c(list(form, train, lpars)))
-    #   })
-
-
     pre_weights <-
       lapply(base_model,
            function(o) {
@@ -110,8 +101,9 @@ learning_base_models <-
     base_model <- unlist(base_model, recursive = FALSE)
     pre_weights  <- unlist(pre_weights, recursive = FALSE)
 
-    W <- vnapply(pre_weights,
-                 function(o) mse(Y_tr, o))
+    W <- vapply(pre_weights, function(o) {
+      rmse(Y_tr, o)
+    }, numeric(1), USE.NAMES = FALSE)
     W <- model_weighting(W, trans = "linear")
 
     list(base_model = base_model, preweights = W)

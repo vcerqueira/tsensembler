@@ -100,6 +100,104 @@
     )
   }
 
+#' ADE training poor version
+#' Train meta-models in the training data,
+#' as opposed to using a validation dataset
+#'
+#' Saves times by not computing oob predictions.
+#' Testing comp costs are the same.
+#'
+#' @param form formula
+#' @param train training data
+#' @param specs a \code{\link{model_specs-class}} object class. It contains
+#' the parameter setting specifications for training the ensemble;
+#'
+#' @param lambda window size. Number of observations to compute
+#' the recent performance of the base models, according to the
+#' committee ratio \strong{omega}. Essentially, the top \emph{omega}
+#' models are selected and weighted at each prediction instance, according
+#' to their performance in the last \emph{lambda} observations.
+#' Defaults to 50 according to empirical experiments;
+#'
+#' @param lfun meta loss function - defaults to \strong{ae} (absolute error)
+#'
+#' @param meta_model_type algorithm used to train meta models. Defaults to a
+#' random forest (using ranger package)
+#'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
+#' @keywords internal
+#'
+#' @import parallel
+#' @import foreach
+#'
+#' @export
+train_ade_quick <-
+  function(form, train, specs, lambda, lfun, meta_model_type, num_cores) {
+    if (length(num_cores) > 1 || !is.numeric(num_cores)) {
+      stop("Please specify a numeric value for num_cores. num_cores = 1
+           leads to sequential training of models. num_cores > 1
+           splits the training of the base models across num_cores cores.")
+    }
+    if (is.null(num_cores)) num_cores <- 1
+
+    tgt <- get_target(form)
+
+    cat("Building base ensemble...\n")
+    M <- build_base_ensemble(form, train, specs, num_cores)
+
+    cat("Setting up poor meta data \n")
+    y_tr <- get_y(train, form)
+    Y_hat_tr <- predict(M, train)
+
+    train_loss <-
+      base_models_loss(
+        Y_hat = Y_hat_tr,
+        Y = y_tr,
+        lfun = lfun)
+
+    OOB <- train
+    OOB_no_tgt <- subset(OOB, select = -which(colnames(OOB) %in% tgt))
+
+    recent_lambda_k <- recent_lambda_observations(OOB, lambda)
+
+    train_metadata <-
+      lapply(train_loss,
+             function(l_hat) cbind.data.frame(OOB_no_tgt,
+                                              score = l_hat))
+
+    cat("Training meta models (an arbiter for each expert\n")
+    if (num_cores > 1) {
+      cl <- parallel::makeCluster(num_cores)
+      doParallel::registerDoParallel(cl)
+      `%partrain%` <- `%dopar%`
+    } else {
+      `%partrain%` <- `%do%`
+    }
+
+    meta_models <-
+      foreach::foreach(meta_set = train_metadata,
+                       .packages = "tsensembler") %partrain% {
+
+                         if (any(is.na(meta_set))) {
+                           meta_set <- soft.completion(meta_set)
+                         }
+
+                         loss_meta_learn(score ~ ., meta_set, meta_model_type)
+                       }
+
+    list(
+      base_ensemble = M,
+      meta_model = meta_models,
+      recent_series = recent_lambda_k,
+      OOB = OOB
+    )
+    }
+
+
 setMethod("show",
           signature("ADE"),
           function(object) {
@@ -128,7 +226,11 @@ setMethod("show",
             names_M <- names(object@Y_hat)
             len <- length(names_M)
 
-            unique_M <- unique(vcapply(names_M, function(j) split_by_(j)[1]))
+            unique_M <- vapply(names_M, function(j) {
+                split_by_(j)[1]
+              }, character(1), USE.NAMES=FALSE)
+
+            unique_M <- unique(unique_M)
             unique_M <- paste(unique_M, collapse = ", ")
 
             cat("The predictions were calculated with", len, "base models:\n")
@@ -140,56 +242,6 @@ setMethod("show",
             cat("slot @E_hat for the predictions of each meta model\n")
           }
 )
-
-
-#' @rdname forecast
-setMethod("forecast",
-          signature("ADE"),
-          function(object, h) {
-
-            forecasts <- numeric(h)
-            for (o in seq_len(h)) {
-              p_forecast <- forecast_ade(object)
-              forecasts[o] <- p_forecast
-
-              object@recent_series <-
-                rbind.data.frame(object@recent_series,
-                                 struc_embed(object, p_forecast))
-            }
-            names(forecasts) <- paste("t", seq_along(forecasts), sep = "+")
-
-            forecasts
-          })
-
-forecast_ade <-
-  function(object) {
-    next_embed <- struc_embed(object, -1)
-
-    Y_hat <- predict(object@base_ensemble, next_embed)
-
-    E_hat <- lapply(object@meta_model,
-                    function(o)
-                      predict(o, next_embed)$predictions)
-
-    E_hat <- as.data.frame(E_hat)
-
-    W <- t(apply(E_hat, 1, model_weighting, na.rm = TRUE))
-
-    Y_hat_recent <- predict(object@base_ensemble, object@recent_series)
-
-    Y_rs <- get_y(object@recent_series, object@form)
-
-    C <- build_committee(Y_hat_recent, Y_rs, object@lambda, object@omega)
-    last_C <- C[[length(C)]]
-
-    Y_hat_j <- Y_hat[1, last_C]
-    W_j <- proportion(W[1, last_C])
-
-    point_forecast <- sum(Y_hat_j * W_j)
-
-    point_forecast
-  }
-
 
 #' Updating the metalearning layer of an ADE model
 #'

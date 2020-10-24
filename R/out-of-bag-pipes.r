@@ -41,8 +41,7 @@ intraining_estimations <-
       base_models_loss(
         Y_hat = Y_hat,
         Y = Y,
-        lfun = lfun,
-        y_tr = Y_tr
+        lfun = lfun
       )
 
     list(mloss = model_loss,

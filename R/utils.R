@@ -1,41 +1,3 @@
-#' Complementary Gaussian Error Function
-#'
-#' Erfc stands for the Complementary Gaussian Error Function.
-#' This mathematical formula can be used as a squashing function.
-#' Consider \code{x} a numeric vector representing the squared error of
-#' base models in a given observation. By applying the erfc function on
-#' the error, the weight of a given model decays exponentially as its
-#' loss increases.
-#'
-#' @param x A numeric vector. The default value for the parameter
-#' \code{lambda} presumes that \code{x} is in a 0--1 range. In the scope of
-#' this package, this is achieved using normalize function;
-#'
-#' @param alpha parameter used to control the flatness of the erfc curve.
-#' Defaults to 2.
-#'
-#' @return The complementary Gaussian error
-#'
-#' @references Cerqueira, Vitor; Torgo, Luis; Oliveira, Mariana,
-#' and Bernhard Pfahringer. "Dynamic and Heterogeneous Ensembles
-#' for Time Series Forecasting." Data Science and Advanced
-#' Analytics (DSAA), 2017 IEEE International Conference on. IEEE, 2017.
-#'
-#' @examples
-#' \dontrun{
-#'   erfc(.1)
-#'   erfc(c(.1, .7))
-#' }
-#'
-#' @keywords internal
-#'
-#' @export
-erfc <- function(x, alpha = 2) {
-	stopifnot(is.numeric(x), is.numeric(alpha))
-
-	2 * stats::pnorm(-sqrt(2) * x * alpha)
-}
-
 #' Get the response values from a data matrix
 #'
 #' Given a formula and a data set, \code{get_y} function retrieves
@@ -82,33 +44,6 @@ roll_mean_matrix <-
     as.data.frame(MASE)
   }
 
-#' First-In First Out
-#'
-#' First-In First Out utility function inserts a
-#' new value \code{inval} into a given sequential vector
-#' \code{x}, dropping the last value of the sequence
-#'
-#' @param x a vector;
-#'
-#' @param inval new input value for vector x of the same
-#' mode as \code{vector}
-#'
-#' @return A new vector \code{x}
-#'
-#' @keywords internal
-#'
-#' @examples
-#' FIFO(1:10, 11)
-#' FIFO(LETTERS[1:10], letters[1])
-#'
-#' @export
-FIFO <-
-  function(x, inval) {
-    stopifnot(mode(x) == mode(inval))
-
-    c(inval, x[-length(x)])
-  }
-
 #' Splitting expressions by pattern
 #'
 #' This is an utility function that can be used to split expressions.
@@ -137,7 +72,7 @@ FIFO <-
 #' @export
 split_by <- function(expr, split, unlist. = TRUE, ...) {
   expr <- strsplit(expr, split = split, fixed = TRUE, ...)
-  if (unlist.) expr <- unlistn(expr)
+  if (unlist.) expr <- unlist(expr, use.names = FALSE)
 
   expr
 }
@@ -156,25 +91,22 @@ split_by. <- function(expr, ...) split_by(expr, split = ".", ...)
 #' Utility function used to linearly normalize a numeric vector
 #'
 #' @param x a numeric vector.
-#' @param ... Further arguments to min and max function
-#' (e.g. na.rm = TRUE)
 #'
 #' @keywords internal
 #'
 #' @examples
 #' normalize(rnorm(4L))
 #' normalize(1:10)
-#' normalize(c(1,2,NA,4), na.rm = TRUE)
 #'
 #' @return a linearly normalized vector
 #'
 #' @export
 normalize <-
-  function(x, ...) {
+  function(x) {
     if (length(x) == 0L)
       stop("passed an argument of length 0.")
     if (!methods::is(x, "vector"))
-      x <- unlistn(x)
+      x <- unlist(x, use.names = FALSE)
     if (!is.numeric(x))
       stop("x must be numeric.")
     if (length(x) == 1L)
@@ -183,10 +115,9 @@ normalize <-
     var_x <- stats::var(x, na.rm = T)
     if (is.na(var_x)) var_x <- 0
 
-    if (var_x == 0)
-      return(x)
+    if (var_x == 0) return(x)
 
-    (x - min(x, ...)) / (max(x, ...) - min(x, ...))
+    (x - min(x)) / (max(x) - min(x))
   }
 
 #' Computing the proportions of a numeric vector
@@ -196,8 +127,6 @@ normalize <-
 #' to the sum of the vector.
 #'
 #' @param x a numeric vector;
-#' @param ... Further arguments to \code{var} and \code{sum}
-#' function (e.g. na.rm = TRUE)
 #'
 #' @examples
 #' proportion(rnorm(5L))
@@ -209,7 +138,7 @@ normalize <-
 #'
 #' @export
 proportion <-
-  function(x, ...) {
+  function(x) {
     if (!methods::is(x, "numeric"))
       x <- unlist(x)
     if (length(x) == 1L)
@@ -223,81 +152,6 @@ proportion <-
 
     x / sum(x, na.rm = T)
   }
-
-#' vapply extension for logical values
-#'
-#' @param x A vector (atomic or list)
-#' @param fun function to be applied
-#' @param ... optional arguments to fun
-#' @param use.names logical. Check argument USE.NAMES from \code{vapply} function.
-#'
-#' @seealso \code{\link{vapply}}
-#'
-#' @keywords internal
-#'
-#' @export
-vlapply = function(x, fun, ..., use.names = FALSE) {
-  vapply(X = x, FUN = fun, ..., FUN.VALUE = NA, USE.NAMES = use.names)
-}
-
-#' vapply extension for integer values
-#'
-#' @param x A vector (atomic or list)
-#' @param fun function to be applied
-#' @param ... optional arguments to fun
-#' @param use.names logical. Check argument USE.NAMES from \code{vapply} function.
-#'
-#' @seealso \code{\link{vapply}}
-#'
-#' @keywords internal
-#'
-#' @export
-viapply = function(x, fun, ..., use.names = FALSE) {
-  vapply(X = x, FUN = fun, ..., FUN.VALUE = NA_integer_, USE.NAMES = use.names)
-}
-
-#' vapply extension for numeric values
-#'
-#' @param x A vector (atomic or list)
-#' @param fun function to be applied
-#' @param ... optional arguments to fun
-#' @param use.names logical. Check argument USE.NAMES from \code{vapply} function.
-#'
-#' @seealso \code{\link{vapply}}
-#'
-#' @keywords internal
-#'
-#' @export
-vnapply = function(x, fun, ..., use.names = FALSE) {
-  vapply(X = x, FUN = fun, ..., FUN.VALUE = NA_real_, USE.NAMES = use.names)
-}
-
-#' vapply extension for character values
-#'
-#' @param x A vector (atomic or list)
-#' @param fun function to be applied
-#' @param ... optional arguments to fun
-#' @param use.names logical. Check argument USE.NAMES from \code{vapply} function.
-#'
-#' @seealso \code{\link{vapply}}
-#'
-#' @keywords internal
-#'
-#' @export
-vcapply = function(x, fun, ..., use.names = FALSE) {
-  vapply(X = x, FUN = fun, ..., FUN.VALUE = NA_character_, USE.NAMES = use.names)
-}
-
-#' Unlist not using names
-#'
-#' @param x object to flat
-#'
-#' @seealso \code{unlist}
-#'
-#' @keywords internal
-#'
-#' @export
-unlistn <- function(x) unlist(x, use.names = FALSE)
 
 #' Get the target from a formula
 #'
@@ -318,16 +172,6 @@ get_target <- function(form) split_by(deparse(form), " ")[1]
 #'
 #' @export
 rbind_l <- function(x) do.call(rbind, x)
-
-#' List without null elements
-#'
-#' @param l list with null elements
-#'
-#' @keywords internal
-#'
-#' @export
-rm.null <- function(l) l[!vlapply(l, is.null)]
-
 
 #' Applying lapply on the rows
 #'
@@ -471,9 +315,6 @@ rm.duplicated <-
 
     Map(function(x) as.numeric(split_by_(x)), clist)
   }
-
-rm.len0 <-
-  function(l) l[!vlapply(l, function(o) length(o) == 0)]
 
 
 model.matrix.na <-
