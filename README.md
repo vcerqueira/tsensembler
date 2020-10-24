@@ -92,4 +92,4 @@ preds <- predict(model, test)@y_hat
 
 ## Contact
 
-Any bug report or suggestion please contact me at vitor.cerqueira@fe.up.pt
+Any bug report or suggestion please contact me at cerqueira.vitormanuel@gmail.com
